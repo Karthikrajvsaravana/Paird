@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'sign_up_screen.dart'; // Make sure this import matches your project structure
+
+import '../../../app/app_scope.dart';
+import '../../../core/api/api_exception.dart';
+import '../../../core/auth/validators.dart';
+import '../../../shared/widgets/paird_widgets.dart';
+import 'forgot_password_screen.dart';
+import 'sign_up_screen.dart';
 
 class SignInScreen extends StatefulWidget {
-  const SignInScreen({Key? key}) : super(key: key);
+  const SignInScreen({super.key});
 
   @override
   State<SignInScreen> createState() => _SignInScreenState();
@@ -15,6 +21,14 @@ class _SignInScreenState extends State<SignInScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   String? _errorMessage;
+  String? _pendingError;
+
+  @override
+  void initState() {
+    super.initState();
+    // e.g. "Your session has expired. Please sign in again."
+    _errorMessage = AppScope.read(context).auth.takeNotice();
+  }
 
   @override
   void dispose() {
@@ -75,7 +89,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red.shade800.withOpacity(0.2),
+                      color: Colors.red.shade800.withValues(alpha: 0.2),
                       border: Border.all(color: Colors.red.shade800),
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -102,6 +116,9 @@ class _SignInScreenState extends State<SignInScreen> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.username],
+                  textInputAction: TextInputAction.next,
                   style: GoogleFonts.plusJakartaSans(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: 'name@example.com',
@@ -121,12 +138,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       borderSide: const BorderSide(color: Color(0xFFC9A24A), width: 1.5),
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email or phone';
-                    }
-                    return null;
-                  },
+                  validator: validateIdentifier,
                 ),
                 const SizedBox(height: 20),
 
@@ -162,6 +174,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       borderSide: const BorderSide(color: Color(0xFFC9A24A), width: 1.5),
                     ),
                     suffixIcon: IconButton(
+                      tooltip: _obscurePassword ? 'Show password' : 'Hide password',
                       icon: Icon(
                         _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                         color: Colors.grey.shade400,
@@ -187,7 +200,11 @@ class _SignInScreenState extends State<SignInScreen> {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      // TODO: Implement forgot password
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ForgotPasswordScreen(initialIdentifier: _emailController.text.trim()),
+                        ),
+                      );
                     },
                     style: TextButton.styleFrom(padding: EdgeInsets.zero),
                     child: Text(
@@ -205,23 +222,30 @@ class _SignInScreenState extends State<SignInScreen> {
                 // 7. Interactive Slide-to-Sign-In Widget
                 SlideToSignInWidget(
                   onAuthAction: () async {
+                    _pendingError = null;
                     if (!(_formKey.currentState?.validate() ?? false)) {
+                      _pendingError = 'Please fix the highlighted fields.';
                       return false;
                     }
-
-                    // Simulate authentication delay
-                    await Future.delayed(const Duration(seconds: 1));
-
-                    // Return true on success
-                    return true;
+                    try {
+                      await AppScope.read(context).auth.signIn(
+                            _emailController.text,
+                            _passwordController.text,
+                          );
+                      return true;
+                    } on ApiException catch (e) {
+                      _pendingError = e.message;
+                      return false;
+                    }
                   },
                   onSuccess: () {
-                    setState(() { _errorMessage = null; });
-                    // TODO: Navigate to home screen
+                    // AuthGate switches to onboarding or home once signed in.
+                    if (mounted) setState(() { _errorMessage = null; });
                   },
                   onError: (message) {
+                    if (!mounted) return;
                     setState(() {
-                      _errorMessage = message;
+                      _errorMessage = _pendingError ?? message;
                     });
                   },
                 ),
@@ -250,7 +274,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 // 9. Google Sign-In Button
                 OutlinedButton.icon(
                   onPressed: () {
-                    // Google Auth placeholder
+                    showSnack(context, "Google sign-in isn't available yet. Please use email or phone.");
                   },
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 48),
@@ -317,11 +341,11 @@ class SlideToSignInWidget extends StatefulWidget {
   final ValueChanged<String>? onError;
 
   const SlideToSignInWidget({
-    Key? key,
+    super.key,
     this.onAuthAction,
     this.onSuccess,
     this.onError,
-  }) : super(key: key);
+  });
 
   @override
   State<SlideToSignInWidget> createState() => _SlideToSignInWidgetState();
@@ -330,7 +354,6 @@ class SlideToSignInWidget extends StatefulWidget {
 class _SlideToSignInWidgetState extends State<SlideToSignInWidget>
     with SingleTickerProviderStateMixin {
   double _dragPosition = 0.0;
-  bool _isDragging = false;
   bool _isLoading = false;
   bool _isSuccess = false;
 
@@ -366,22 +389,19 @@ class _SlideToSignInWidgetState extends State<SlideToSignInWidget>
     _animation = Tween<double>(begin: _dragPosition, end: 0.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
-    _controller.forward(from: 0.0).then((_) {
-      setState(() {
-        _isDragging = false;
-      });
-    });
+    _controller.forward(from: 0.0);
   }
 
   void _completeSlide(double maxDrag) async {
     setState(() {
       _dragPosition = maxDrag;
-      _isDragging = false;
       _isLoading = true;
     });
 
     try {
       final success = widget.onAuthAction != null ? await widget.onAuthAction!() : true;
+      // The screen may be replaced as soon as the session starts.
+      if (!mounted) return;
       if (success) {
         setState(() {
           _isLoading = false;
@@ -396,6 +416,7 @@ class _SlideToSignInWidgetState extends State<SlideToSignInWidget>
         _runSnapBack(maxDrag);
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
@@ -444,13 +465,17 @@ class _SlideToSignInWidgetState extends State<SlideToSignInWidget>
               // Draggable Gold Thumb with Arrow / Checkmark / Loader
               Positioned(
                 left: 4.0 + _dragPosition,
-                child: GestureDetector(
+                // Screen readers cannot drag: expose the slide as a button.
+                child: Semantics(
+                  button: true,
+                  label: _isSuccess ? 'Signed in' : 'Sign in',
+                  hint: 'Double tap to sign in',
+                  onTap: (_isLoading || _isSuccess) ? null : () => _completeSlide(maxDrag),
+                  excludeSemantics: true,
+                  child: GestureDetector(
                   onHorizontalDragStart: (_isLoading || _isSuccess)
                       ? null
                       : (_) {
-                    setState(() {
-                      _isDragging = true;
-                    });
                     _controller.stop();
                   },
                   onHorizontalDragUpdate: (_isLoading || _isSuccess)
@@ -488,7 +513,7 @@ class _SlideToSignInWidgetState extends State<SlideToSignInWidget>
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -515,6 +540,7 @@ class _SlideToSignInWidgetState extends State<SlideToSignInWidget>
                       ),
                     ),
                   ),
+                ),
                 ),
               ),
             ],

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../app/app_scope.dart';
+import '../../../core/api/api_exception.dart';
+import '../../../core/auth/validators.dart';
+import '../../../shared/widgets/paird_widgets.dart';
+
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({Key? key}) : super(key: key);
+  const SignUpScreen({super.key});
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -17,7 +22,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _submitting = false;
   String? _errorMessage;
+  Map<String, String?> _serverErrors = const {};
 
   @override
   void dispose() {
@@ -28,13 +35,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-  void _handleSignUp() {
-    if (_formKey.currentState?.validate() ?? false) {
+  Future<void> _handleSignUp() async {
+    if (_submitting) return;
+    setState(() {
+      _serverErrors = const {};
+      _errorMessage = null;
+    });
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() => _submitting = true);
+    final auth = AppScope.read(context).auth;
+    final navigator = Navigator.of(context);
+    try {
+      await auth.signUp(
+        fullName: _nameController.text,
+        identifier: _emailController.text,
+        password: _passwordController.text,
+      );
+      // Signed in: return to the root so AuthGate can show onboarding.
+      navigator.popUntil((route) => route.isFirst);
+    } on ApiException catch (e) {
+      if (!mounted) return;
       setState(() {
-        _errorMessage = null;
+        _serverErrors = {
+          'full_name': e.fieldError('full_name'),
+          'identifier': e.fieldError('identifier'),
+          'password': e.fieldError('password'),
+        };
+        _errorMessage = e.message;
       });
-      // TODO: Implement your account creation logic here
-      // e.g., AuthService.signUp(...)
+    } finally {
+      if (mounted) setState(() => _submitting = false);
     }
   }
 
@@ -55,6 +85,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 Row(
                   children: [
                     IconButton(
+                      tooltip: 'Back',
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.arrow_back_ios_rounded, color: Color(0xFFE2C078), size: 20),
                       padding: EdgeInsets.zero,
@@ -103,7 +134,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red.shade800.withOpacity(0.2),
+                      color: Colors.red.shade800.withValues(alpha: 0.2),
                       border: Border.all(color: Colors.red.shade800),
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -130,8 +161,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _nameController,
+                  textCapitalization: TextCapitalization.words,
+                  autofillHints: const [AutofillHints.name],
+                  textInputAction: TextInputAction.next,
                   style: GoogleFonts.plusJakartaSans(color: Colors.white),
                   decoration: InputDecoration(
+                    errorText: _serverErrors['full_name'],
                     hintText: 'Enter your full name',
                     hintStyle: GoogleFonts.plusJakartaSans(color: Colors.grey.shade600),
                     filled: true,
@@ -170,8 +205,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.username],
+                  textInputAction: TextInputAction.next,
                   style: GoogleFonts.plusJakartaSans(color: Colors.white),
                   decoration: InputDecoration(
+                    errorText: _serverErrors['identifier'],
+                    errorMaxLines: 3,
                     hintText: 'name@example.com',
                     hintStyle: GoogleFonts.plusJakartaSans(color: Colors.grey.shade600),
                     filled: true,
@@ -189,12 +229,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       borderSide: const BorderSide(color: Color(0xFFC9A24A), width: 1.5),
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your email or phone';
-                    }
-                    return null;
-                  },
+                  validator: validateIdentifier,
                 ),
                 const SizedBox(height: 16),
 
@@ -212,7 +247,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   controller: _passwordController,
                   obscureText: _obscurePassword,
                   style: GoogleFonts.plusJakartaSans(color: Colors.white),
+                  autofillHints: const [AutofillHints.newPassword],
                   decoration: InputDecoration(
+                    errorText: _serverErrors['password'],
+                    errorMaxLines: 4,
                     hintText: 'Create a secure password',
                     hintStyle: GoogleFonts.plusJakartaSans(color: Colors.grey.shade600),
                     filled: true,
@@ -230,6 +268,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       borderSide: const BorderSide(color: Color(0xFFC9A24A), width: 1.5),
                     ),
                     suffixIcon: IconButton(
+                      tooltip: _obscurePassword ? 'Show password' : 'Hide password',
                       icon: Icon(
                         _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                         color: Colors.grey.shade400,
@@ -241,12 +280,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       },
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
-                  },
+                  validator: validateNewPassword,
                 ),
                 const SizedBox(height: 16),
 
@@ -282,6 +316,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       borderSide: const BorderSide(color: Color(0xFFC9A24A), width: 1.5),
                     ),
                     suffixIcon: IconButton(
+                      tooltip: _obscureConfirmPassword ? 'Show password' : 'Hide password',
                       icon: Icon(
                         _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                         color: Colors.grey.shade400,
@@ -314,30 +349,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFC9A24A).withOpacity(0.2),
+                        color: const Color(0xFFC9A24A).withValues(alpha: 0.2),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
                     ],
                   ),
                   child: ElevatedButton(
-                    onPressed: _handleSignUp,
+                    onPressed: _submitting ? null : _handleSignUp,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
+                      disabledBackgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Text(
-                      'Create Account',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 15,
-                        color: const Color(0xFF121816),
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
+                    child: _submitting
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF121816)),
+                          )
+                        : Text(
+                            'Create Account',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 15,
+                              color: const Color(0xFF121816),
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -365,7 +407,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 // Google Sign-In Button
                 OutlinedButton.icon(
                   onPressed: () {
-                    // Google Auth placeholder
+                    showSnack(context, "Google sign-up isn't available yet. Please use email or phone.");
                   },
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 48),

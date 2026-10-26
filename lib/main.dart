@@ -1,23 +1,14 @@
 import 'package:flutter/material.dart';
-import 'features/auth/screens/sign_in_screen.dart';
+
+import 'app/paird_app.dart';
+import 'core/api/api_client.dart';
+import 'core/api/paird_api.dart';
+import 'core/auth/auth_controller.dart';
+import 'core/auth/token_store.dart';
 
 void main() {
-  runApp(const PairdApp());
-}
-
-class PairdApp extends StatelessWidget {
-  const PairdApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Paird',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-      ),
-      home: const SignInScreen(),
-    );
-  }
+  WidgetsFlutterBinding.ensureInitialized();
+  final api = PairdApi(ApiClient(tokenStore: SecureTokenStore()));
+  final auth = AuthController(api: api)..restore();
+  runApp(PairdApp(api: api, auth: auth));
 }

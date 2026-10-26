@@ -46,3 +46,23 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Python / Django backend
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example
+*.sqlite3
+backend/media/
+backend/staticfiles/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Android signing material (never commit)
+*.jks
+*.keystore
+android/key.properties
