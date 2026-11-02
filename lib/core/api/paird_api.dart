@@ -25,8 +25,12 @@ class PairdApi {
       Account(_map(await client.patch('/auth/me/', {'full_name': fullName})));
   Future<Map<String, dynamic>> changePassword(String current, String next) async =>
       _map(await client.post('/auth/change-password/', {'current_password': current, 'new_password': next}));
-  Future<void> requestPasswordReset(String identifier) =>
-      client.postPublic('/auth/password-reset/', {'identifier': identifier});
+  /// Returns how many seconds to wait before a new code can be requested.
+  Future<int> requestPasswordReset(String identifier) async {
+    final data = await client.postPublic('/auth/password-reset/', {'identifier': identifier});
+    return (data is Map ? data['resend_after_seconds'] as int? : null) ?? 60;
+  }
+
   Future<void> confirmPasswordReset(String identifier, String code, String newPassword) => client.postPublic(
         '/auth/password-reset/confirm/',
         {'identifier': identifier, 'code': code, 'new_password': newPassword},

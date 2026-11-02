@@ -199,12 +199,21 @@ class _SignInScreenState extends State<SignInScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
+                    onPressed: () async {
+                      final resetFor = await Navigator.of(context).push<String>(
                         MaterialPageRoute(
                           builder: (context) => ForgotPasswordScreen(initialIdentifier: _emailController.text.trim()),
                         ),
                       );
+                      // After a successful reset, prefill the email for signing in.
+                      if (resetFor != null && context.mounted) {
+                        setState(() {
+                          _emailController.text = resetFor;
+                          _passwordController.clear();
+                          _errorMessage = null;
+                        });
+                        showSnack(context, 'Password updated. Sign in with your new password.');
+                      }
                     },
                     style: TextButton.styleFrom(padding: EdgeInsets.zero),
                     child: Text(

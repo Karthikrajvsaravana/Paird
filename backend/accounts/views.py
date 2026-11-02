@@ -19,12 +19,14 @@ from . import serializers as s
 from .identifiers import EMAIL
 from .models import AccountIdentity
 from .services import (
+    RESET_RESEND_COOLDOWN,
     confirm_password_reset,
     create_account,
     delete_account,
     email_delivery_configured,
     issue_tokens,
     revoke_all_tokens,
+    send_password_changed_email,
     start_password_reset,
 )
 
@@ -125,6 +127,7 @@ class ChangePasswordView(AuthThrottleMixin, APIView):
         user.set_password(serializer.validated_data["new_password"])
         user.save(update_fields=["password"])
         revoke_all_tokens(user)
+        send_password_changed_email(user.pk)
         return Response({"tokens": issue_tokens(user)})
 
 
@@ -145,8 +148,14 @@ class PasswordResetRequestView(AuthThrottleMixin, APIView):
         identity = AccountIdentity.objects.select_related("user").filter(email=identifier, user__is_active=True).first()
         if identity:
             start_password_reset(identity)
-        # Same response whether or not the account exists (no enumeration).
-        return Response({"detail": "If an account exists for this email, a reset code has been sent."})
+        # Same response whether or not the account exists, whether the resend
+        # cooldown applied, or whether the mail server failed (no enumeration).
+        return Response(
+            {
+                "detail": "If an account exists for this email, a reset code has been sent. Check your inbox and spam folder.",
+                "resend_after_seconds": int(RESET_RESEND_COOLDOWN.total_seconds()),
+            }
+        )
 
 
 class PasswordResetConfirmView(AuthThrottleMixin, APIView):

@@ -36,7 +36,7 @@ Flutter app (Android)  ──HTTPS/JSON + JWT──▶  Django REST Framework (/
 |---|---|---|---|
 | 1 | Sign in | Done | Email or phone plus password. The original slide-to-sign-in is kept and also works with screen readers. |
 | 2 | Sign up | Done | Original form. Validated in the app and on the server; duplicate accounts are blocked by a unique constraint; submit is locked while saving; errors come from the server. |
-| 3 | Forgot / reset password | Done (needs SMTP) | 6-digit email code, single use, 15-minute expiry, 5 attempts. The reply never reveals whether an account exists. SMS reset needs a provider. |
+| 3 | Forgot / reset password | Done (needs SMTP) | 6-digit email code: single use, 15-minute expiry, locks after 5 wrong tries. "Resend code" is available after 60 seconds, and the server sends at most one code per minute per account. Confirm-password field. After a reset, other sessions are signed out, a "your password was changed" security email is sent, and sign-in opens with the email filled in. The response never reveals whether an account exists. Passwords can't be "sent" (they are stored hashed), only reset. SMS reset needs a provider. |
 | 4 | Onboarding | Done | 10 steps, saved to the server after each step and resumable. |
 | 5 | Profile completion | Done | Server computes the percentage and the missing required fields; publishing is blocked until they're complete. |
 | 6 | Dashboard | Done | Real counts, notices and recommendations; nothing invented. |

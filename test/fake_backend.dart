@@ -13,6 +13,8 @@ class FakeBackend {
   int _counter = 0;
   bool offline = false;
   bool profileComplete = false;
+  final resetRequests = <String>[];
+  String resetCode = '123456';
 
   /// Extra JSON responses for signed-in endpoints, keyed by "METHOD /path/".
   final routes = <String, Object? Function(Map<String, dynamic> body)>{};
@@ -75,6 +77,16 @@ class FakeBackend {
       case '/auth/logout/':
         validRefresh.remove(body['refresh']);
         return http.Response('', 204);
+      case '/auth/password-reset/':
+        resetRequests.add(body['identifier'] as String);
+        return _json({'detail': 'If an account exists…', 'resend_after_seconds': 60});
+      case '/auth/password-reset/confirm/':
+        final id = (body['identifier'] as String).toLowerCase();
+        if (body['code'] != resetCode || !users.containsKey(id)) {
+          return _json({'error': {'code': 'invalid_code', 'message': 'That code is invalid or has expired.'}}, 400);
+        }
+        users[id] = (password: body['new_password'] as String, name: users[id]!.name);
+        return _json({'detail': 'Your password has been reset. Please sign in.'});
       case '/auth/me/':
         if (request.headers['Authorization'] != 'Bearer $validAccess') return _error(401, 'Not authenticated');
         return _json(_user(users.keys.isEmpty ? 'a@b.co' : users.keys.first));
