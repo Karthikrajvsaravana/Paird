@@ -243,7 +243,7 @@ Scoped throttles apply to authentication, interests, messages, uploads and repor
    - Run `manage.py collectstatic`.
    - For uploads, use a **private** S3-compatible bucket. Supabase Storage provides an S3 endpoint: `pip install "django-storages[s3]"`, set `STORAGE_BACKEND=s3` and the `STORAGE_S3_*` variables. Never make the bucket public. The API serves short-lived signed URLs after its own authorisation check.
 4. **Shared cache:** with more than one process, configure a shared cache (for example Redis) so throttling works across processes.
-5. **Email:** configure SMTP (`EMAIL_*`) to enable password reset codes.
+5. **Email:** configure SMTP (`EMAIL_*`) to send welcome emails after email sign-up and password reset codes. Welcome emails are sent only after the account is saved, and a mail failure never fails registration (`PAIRD_WELCOME_EMAIL_ENABLED`, `PAIRD_SUPPORT_EMAIL`).
 6. **Scheduled expiry (optional):** schedule `manage.py expire_interests` hourly. Expiry is also enforced on every request.
 7. **Database:**
    - Use least-privilege database credentials and enable Supabase backups / point-in-time recovery.

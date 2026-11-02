@@ -211,7 +211,7 @@ flutter test
 
 | Service | Needed for | Status without it |
 |---|---|---|
-| SMTP (`EMAIL_HOST`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL`) | Password reset emails | Debug mode prints the code in the Django console. Production returns "not configured". |
+| SMTP (`EMAIL_HOST`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL`) | Welcome email after email sign-up, and password reset emails | Debug mode prints these emails (welcome email and reset code) in the Django console. Production returns "not configured". |
 | SMS provider | Phone-number password reset | The app says it isn't available. |
 | Google OAuth client and SHA-1 | Google sign-in | The button says it isn't available. |
 | Firebase Cloud Messaging | Push notifications | In-app notifications and badges only. |

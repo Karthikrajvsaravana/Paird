@@ -282,6 +282,8 @@ PAIRD = {
     "DISCOVERY_CANDIDATE_CAP": env_int("PAIRD_DISCOVERY_CANDIDATE_CAP", 500),
     "DEFAULT_PHONE_COUNTRY_CODE": os.environ.get("PAIRD_DEFAULT_PHONE_COUNTRY_CODE", "").strip(),
     "MESSAGE_MAX_LENGTH": 2000,
+    "WELCOME_EMAIL_ENABLED": env_bool("PAIRD_WELCOME_EMAIL_ENABLED", True),
+    "SUPPORT_EMAIL": os.environ.get("PAIRD_SUPPORT_EMAIL", "").strip(),
 }
 
 
@@ -316,6 +318,7 @@ EMAIL_PORT = env_int("EMAIL_PORT", 587)
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
+EMAIL_TIMEOUT = env_int("EMAIL_TIMEOUT", 10)  # seconds; a slow mail server must not stall sign-up
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Paird <no-reply@localhost>")
 EMAIL_BACKEND = os.environ.get(
     "EMAIL_BACKEND",
