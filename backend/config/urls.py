@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.urls import include, path
 
 from core.dashboard import DashboardView
-from core.views import CountryListView, StateListView, health
+from core.views import CountryListView, StateListView, health, root
 
 api_v1 = [
     path("health/", health, name="health"),
@@ -22,6 +22,7 @@ api_v1 = [
 ]
 
 urlpatterns = [
+    path("", root, name="root"),
     path("admin/", admin.site.urls),
     path("api/v1/", include(api_v1)),
 ]

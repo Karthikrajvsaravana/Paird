@@ -53,3 +53,11 @@ class StateListView(APIView):
         if found is None:
             raise NotFound("Unknown country.")
         return Response({"code": found["code"], "name": found["name"], "states": found["states"]})
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@throttle_classes([])
+def root(request):
+    """Friendly landing response for http://<host>:8001/ (no data exposed)."""
+    return Response({"service": "PairD API", "status": "running", "health": "/api/v1/health/", "admin": "/admin/"})

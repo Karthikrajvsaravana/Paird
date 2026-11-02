@@ -53,3 +53,11 @@ class ProductionErrorPagesTests(TestCase):
         response = APIClient().get("/api/v1/definitely-not-here/")
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["error"]["code"], "not_found")
+
+
+class RootTests(TestCase):
+    def test_root_says_the_api_is_running(self):
+        response = APIClient().get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["service"], "PairD API")
+        self.assertEqual(response.json()["health"], "/api/v1/health/")
