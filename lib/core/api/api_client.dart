@@ -8,7 +8,7 @@ import '../auth/token_store.dart';
 import '../config/app_config.dart';
 import 'api_exception.dart';
 
-/// Thin JSON client for the Paird API.
+/// Thin JSON client for the PairD API.
 ///
 /// * Attaches the in-memory access token.
 /// * On a 401 it refreshes the session once (single-flight, so concurrent
@@ -36,7 +36,7 @@ class ApiClient {
   ApiException _networkError({bool timeout = false}) {
     var message = timeout
         ? 'The server took too long to respond. Check your connection.'
-        : "Can't reach Paird. Check your internet connection.";
+        : "Can't reach PairD. Check your internet connection.";
     if (kDebugMode) {
       message += '\n\nServer: $baseUrl';
       if (AppConfig.usingEmulatorDefault && baseUrl.contains('10.0.2.2')) {

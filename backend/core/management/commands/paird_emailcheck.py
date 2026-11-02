@@ -1,6 +1,6 @@
 """
 Show how outgoing email is configured (no secrets) and optionally send a
-test email. Also tells you whether an address belongs to a Paird account.
+test email. Also tells you whether an address belongs to a PairD account.
 
     .\\backend\\.venv\\Scripts\\python.exe .\\backend\\manage.py paird_emailcheck
     .\\backend\\.venv\\Scripts\\python.exe .\\backend\\manage.py paird_emailcheck --send-to you@example.com
@@ -55,11 +55,11 @@ class Command(BaseCommand):
         from accounts.models import AccountIdentity
 
         exists = AccountIdentity.objects.filter(email=target, user__is_active=True).exists()
-        self.stdout.write(f"Paird account:   {'found' if exists else 'NOT FOUND — reset codes are only sent to registered emails'}")
+        self.stdout.write(f"PairD account:   {'found' if exists else 'NOT FOUND — reset codes are only sent to registered emails'}")
         try:
             send_mail(
-                "Paird test email",
-                "This is a test email from your Paird backend. Email sending works.",
+                "PairD test email",
+                "This is a test email from your PairD backend. Email sending works.",
                 settings.DEFAULT_FROM_EMAIL,
                 [target],
             )

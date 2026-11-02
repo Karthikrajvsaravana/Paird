@@ -72,7 +72,7 @@ class PasswordResetFlowTests(TestCase):
         self.assertTrue(self.user.check_password("Fresh-Garden-77"))
         refresh = self.client.post("/api/v1/auth/refresh/", {"refresh": tokens["refresh"]}, format="json")
         self.assertEqual(refresh.status_code, 401)
-        self.assertEqual(mail.outbox[-1].subject, "Your Paird password was changed")
+        self.assertEqual(mail.outbox[-1].subject, "Your PairD password was changed")
         self.assertNotIn("Fresh-Garden-77", mail.outbox[-1].body)
         login = self.client.post("/api/v1/auth/login/", {"identifier": EMAIL, "password": "Fresh-Garden-77"}, format="json")
         self.assertEqual(login.status_code, 200)
@@ -128,5 +128,5 @@ class PasswordChangeNotificationTests(TestCase):
             format="json",
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(mail.outbox[-1].subject, "Your Paird password was changed")
+        self.assertEqual(mail.outbox[-1].subject, "Your PairD password was changed")
         self.assertEqual(mail.outbox[-1].to, ["changer@example.com"])

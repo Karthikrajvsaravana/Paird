@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Paird palette, taken from the original sign-in / sign-up screens.
+/// PairD palette, taken from the original sign-in / sign-up screens.
 class AppColors {
   AppColors._();
 

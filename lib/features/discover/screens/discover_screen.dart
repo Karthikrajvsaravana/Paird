@@ -6,6 +6,7 @@ import '../../../app/theme/app_theme.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/models/models.dart';
 import '../../../shared/widgets/paird_widgets.dart';
+import '../../../shared/widgets/pickers.dart';
 import '../../profile/screens/preferences_screen.dart';
 import '../member_tile.dart';
 
@@ -173,12 +174,11 @@ class _FilterSheet extends StatefulWidget {
 class _FilterSheetState extends State<_FilterSheet> {
   late final Map<String, dynamic> _f = Map<String, dynamic>.from(widget.initial);
   late final _city = TextEditingController(text: widget.initial['city'] as String? ?? '');
-  late final _country = TextEditingController(text: widget.initial['country'] as String? ?? '');
+  late String _country = widget.initial['country'] as String? ?? '';
 
   @override
   void dispose() {
     _city.dispose();
-    _country.dispose();
     super.dispose();
   }
 
@@ -235,7 +235,34 @@ class _FilterSheetState extends State<_FilterSheet> {
             ),
             TextField(controller: _city, decoration: const InputDecoration(labelText: 'City contains')),
             const SizedBox(height: 12),
-            TextField(controller: _country, decoration: const InputDecoration(labelText: 'Country')),
+            Row(
+              children: [
+                Expanded(
+                  child: PickerField(
+                    value: _country,
+                    placeholder: 'Any country',
+                    onTap: () async {
+                      final countries = await AppScope.read(context).api.countries();
+                      if (!context.mounted) return;
+                      final picked = await showSearchablePicker(
+                        context,
+                        title: 'Country',
+                        items: [for (final c in countries) c.name],
+                        selected: _country,
+                        searchHint: 'Search countries',
+                      );
+                      if (picked != null) setState(() => _country = picked);
+                    },
+                  ),
+                ),
+                if (_country.isNotEmpty)
+                  IconButton(
+                    tooltip: 'Any country',
+                    icon: const Icon(Icons.clear, color: AppColors.textSecondary),
+                    onPressed: () => setState(() => _country = ''),
+                  ),
+              ],
+            ),
             const SizedBox(height: 16),
             _multi('religion', 'religion', 'Religion'),
             _multi('education_level', 'education_level', 'Education'),
@@ -259,7 +286,7 @@ class _FilterSheetState extends State<_FilterSheet> {
               onPressed: () => Navigator.pop(context, {
                 ..._f,
                 'city': _city.text.trim(),
-                'country': _country.text.trim(),
+                'country': _country,
               }),
             ),
           ],

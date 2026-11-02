@@ -3,6 +3,8 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework import serializers
 
+from core.locations import canonical_state, find_country
+
 from . import choices as c
 from .models import PartnerPreference, Photo, Profile, age_on, min_birth_date
 from .services import (
@@ -75,7 +77,7 @@ def display_name(user):
     full_name = (identity.full_name if identity else user.first_name) or ""
     parts = full_name.split()
     if not parts:
-        return "Paird member"
+        return "PairD member"
     if len(parts) == 1:
         return parts[0]
     return f"{parts[0]} {parts[-1][0]}."
@@ -159,7 +161,7 @@ class OwnProfileSerializer(serializers.ModelSerializer):
         if value > timezone.localdate():
             raise serializers.ValidationError("Date of birth cannot be in the future.")
         if value > min_birth_date():
-            raise serializers.ValidationError(f"You must be at least {settings.PAIRD['MIN_AGE']} years old to use Paird.")
+            raise serializers.ValidationError(f"You must be at least {settings.PAIRD['MIN_AGE']} years old to use PairD.")
         if age_on(value) > settings.PAIRD["MAX_AGE"]:
             raise serializers.ValidationError("Enter a valid date of birth.")
         return value
@@ -175,6 +177,7 @@ class OwnProfileSerializer(serializers.ModelSerializer):
                 attrs[field] = " ".join(attrs[field].split()) if field not in ("about_me", "about_family") else attrs[field].strip()
 
         instance = self.instance
+        self._validate_location(attrs, instance)
         income = attrs.get("annual_income", getattr(instance, "annual_income", None))
         currency = attrs.get("income_currency", getattr(instance, "income_currency", ""))
         if income is not None and not currency:
@@ -190,6 +193,27 @@ class OwnProfileSerializer(serializers.ModelSerializer):
         if attrs.get("accept_consent") is False:
             raise serializers.ValidationError({"accept_consent": "Consent cannot be withdrawn here. Deactivate or delete your account instead."})
         return attrs
+
+    def _validate_location(self, attrs, instance):
+        """Country must be a listed country; state must belong to it."""
+        if "country" in attrs and attrs["country"]:
+            country = find_country(attrs["country"])
+            if country is None:
+                raise serializers.ValidationError({"country": "Choose your country from the list."})
+            attrs["country"] = country["name"]
+        if "country" not in attrs and "state" not in attrs:
+            return
+        country = find_country(attrs.get("country", getattr(instance, "country", "")))
+        state = attrs.get("state", getattr(instance, "state", "")) or ""
+        if not state:
+            return
+        listed = canonical_state(country, state)
+        if listed is not None:
+            attrs["state"] = listed
+        elif "state" in attrs:
+            raise serializers.ValidationError({"state": "Choose a state from the list for your country."})
+        else:
+            attrs["state"] = ""  # country changed: the old state no longer applies
 
     def update(self, instance, validated_data):
         if validated_data.pop("accept_consent", False) and instance.consent_accepted_at is None:
@@ -260,6 +284,15 @@ class PartnerPreferenceSerializer(serializers.ModelSerializer):
         if value is not None and value < settings.PAIRD["MIN_AGE"]:
             raise serializers.ValidationError(f"Minimum age is {settings.PAIRD['MIN_AGE']}.")
         return value
+
+    def validate_countries(self, value):
+        names = []
+        for item in value:
+            country = find_country(item)
+            if country is None:
+                raise serializers.ValidationError(f"Unknown country: {item}")
+            names.append(country["name"])
+        return names
 
     def validate(self, attrs):
         for field, value in list(attrs.items()):

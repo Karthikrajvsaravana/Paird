@@ -1,4 +1,4 @@
-// Typed views over Paird API payloads. Only fields the app uses are mapped.
+// Typed views over PairD API payloads. Only fields the app uses are mapped.
 
 DateTime? _date(dynamic value) => value == null ? null : DateTime.tryParse(value.toString())?.toLocal();
 int _int(dynamic value) => value is int ? value : int.tryParse('${value ?? 0}') ?? 0;
@@ -62,7 +62,7 @@ class MemberCard {
   final Map<String, dynamic> json;
 
   int get userId => _int(json['user_id']);
-  String get displayName => json['display_name'] as String? ?? 'Paird member';
+  String get displayName => json['display_name'] as String? ?? 'PairD member';
   int? get age => json['age'] as int?;
   String get city => json['city'] as String? ?? '';
   String get country => json['country'] as String? ?? '';
@@ -183,4 +183,11 @@ String timeLeft(DateTime? until) {
   if (diff.inDays >= 1) return '${diff.inDays}d left';
   if (diff.inHours >= 1) return '${diff.inHours}h left';
   return '${diff.inMinutes}m left';
+}
+
+class Country {
+  const Country(this.code, this.name, this.hasStates);
+  final String code;
+  final String name;
+  final bool hasStates;
 }

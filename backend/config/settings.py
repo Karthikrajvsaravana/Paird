@@ -1,5 +1,5 @@
 """
-Django settings for the Paird backend.
+Django settings for the PairD backend.
 
 All secrets and environment-specific values are read from environment
 variables (loaded from backend/.env in development). See backend/.env.example
@@ -64,7 +64,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    # Paird
+    # PairD
     'core',
     'accounts',
     'profiles',
@@ -271,7 +271,7 @@ CACHES = {
 }
 
 
-# Paird product rules (documented in README.md)
+# PairD product rules (documented in README.md)
 
 PAIRD = {
     "MIN_AGE": env_int("PAIRD_MIN_AGE", 18),
@@ -319,7 +319,7 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
 EMAIL_TIMEOUT = env_int("EMAIL_TIMEOUT", 10)  # seconds; a slow mail server must not stall sign-up
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Paird <no-reply@localhost>")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "PairD <no-reply@localhost>")
 EMAIL_BACKEND = os.environ.get(
     "EMAIL_BACKEND",
     "django.core.mail.backends.console.EmailBackend"

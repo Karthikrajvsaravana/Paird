@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_scope.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/models/models.dart';
+import '../../../core/api/api_exception.dart';
 import '../../../shared/widgets/paird_widgets.dart';
+import '../../../shared/widgets/pickers.dart';
 
 /// Partner preferences. Gender and age range filter discovery; everything
 /// else is optional and shapes the Vibe Score (see README "Vibe Score").
@@ -24,7 +27,6 @@ class PreferencesFormState extends State<PreferencesForm> {
   );
   late bool _ageSet = widget.initial['age_min'] != null || widget.initial['age_max'] != null;
   late final _income = TextEditingController(text: widget.initial['income_min']?.toString() ?? '');
-  final _countryInput = TextEditingController();
   String? _error;
 
   int get _minAge => widget.options.minAge == 0 ? 18 : widget.options.minAge;
@@ -46,7 +48,6 @@ class PreferencesFormState extends State<PreferencesForm> {
   @override
   void dispose() {
     _income.dispose();
-    _countryInput.dispose();
     super.dispose();
   }
 
@@ -95,15 +96,23 @@ class PreferencesFormState extends State<PreferencesForm> {
     );
   }
 
-  void _addCountry() {
-    final value = _countryInput.text.trim();
-    if (value.isEmpty) return;
+  Future<void> _addCountry() async {
     final list = ((_draft['countries'] as List?) ?? const []).map((e) => e.toString()).toList();
-    if (!list.any((c) => c.toLowerCase() == value.toLowerCase()) && list.length < 20) list.add(value);
-    setState(() {
-      _draft['countries'] = list;
-      _countryInput.clear();
-    });
+    if (list.length >= 20) return;
+    try {
+      final countries = await AppScope.read(context).api.countries();
+      if (!mounted) return;
+      final picked = await showSearchablePicker(
+        context,
+        title: 'Add a country',
+        items: [for (final c in countries) if (!list.contains(c.name)) c.name],
+        searchHint: 'Search countries',
+      );
+      if (picked == null || !mounted) return;
+      setState(() => _draft['countries'] = [...list, picked]);
+    } on ApiException catch (e) {
+      if (mounted) setState(() => _error = e.message);
+    }
   }
 
   @override
@@ -144,19 +153,13 @@ class PreferencesFormState extends State<PreferencesForm> {
         _multi('marital_statuses', 'Marital status'),
         _multi('religions', 'Religion'),
         const FieldLabel('Countries', optional: true),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _countryInput,
-                textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(hintText: 'Add a country'),
-                onSubmitted: (_) => _addCountry(),
-              ),
-            ),
-            const SizedBox(width: 8),
-            IconButton.filledTonal(onPressed: _addCountry, icon: const Icon(Icons.add), tooltip: 'Add country'),
-          ],
+        Align(
+          alignment: Alignment.centerLeft,
+          child: OutlinedButton.icon(
+            onPressed: _addCountry,
+            icon: const Icon(Icons.add, color: AppColors.gold),
+            label: Text(countries.isEmpty ? 'Add a country (any if none)' : 'Add another country'),
+          ),
         ),
         const SizedBox(height: 8),
         Wrap(

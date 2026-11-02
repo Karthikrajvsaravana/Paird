@@ -50,10 +50,10 @@ class _SignInScreenState extends State<SignInScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 20),
-                // 1. Paird Logo / Name
+                // 1. PairD Logo / Name
                 Center(
                   child: Text(
-                    'Paird',
+                    'PairD',
                     style: GoogleFonts.instrumentSerif(
                       fontSize: 36,
                       color: const Color(0xFFE2C078), // Elegant Gold
@@ -305,7 +305,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                // 10. Bottom text: “New to Paird? Create account”
+                // 10. Bottom text: “New to PairD? Create account”
                 Center(
                   child: GestureDetector(
                     onTap: () {
@@ -315,7 +315,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     },
                     child: RichText(
                       text: TextSpan(
-                        text: "New to Paird? ",
+                        text: "New to PairD? ",
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14,
                           color: Colors.grey.shade400,

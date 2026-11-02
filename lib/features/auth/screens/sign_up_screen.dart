@@ -95,10 +95,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 const SizedBox(height: 10),
 
-                // 1. Paird Logo / Name
+                // 1. PairD Logo / Name
                 Center(
                   child: Text(
-                    'Paird',
+                    'PairD',
                     style: GoogleFonts.instrumentSerif(
                       fontSize: 36,
                       color: const Color(0xFFE2C078), // Elegant Gold
@@ -121,7 +121,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 // 3. Subtitle
                 Text(
-                  'Find your meaningful connection with Paird.',
+                  'Find your meaningful connection with PairD.',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14,
                     color: const Color(0xFF9CA3AF),

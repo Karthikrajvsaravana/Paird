@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 
-/// App-wide theme matching the existing Paird visual identity:
+/// App-wide theme matching the existing PairD visual identity:
 /// dark green surfaces, gold accents, Instrument Serif + Plus Jakarta Sans.
 class AppTheme {
   AppTheme._();

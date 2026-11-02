@@ -1,4 +1,4 @@
-# Paird — Implementation Status
+# PairD — Implementation Status
 
 _Last updated: 2026-10-26_
 
@@ -37,7 +37,7 @@ Flutter app (Android)  ──HTTPS/JSON + JWT──▶  Django REST Framework (/
 | 1 | Sign in | Done | Email or phone plus password. The original slide-to-sign-in is kept and also works with screen readers. |
 | 2 | Sign up | Done | Original form. Validated in the app and on the server; duplicate accounts are blocked by a unique constraint; submit is locked while saving; errors come from the server. |
 | 3 | Forgot / reset password | Done (needs SMTP) | 6-digit email code: single use, 15-minute expiry, locks after 5 wrong tries. "Resend code" is available after 60 seconds, and the server sends at most one code per minute per account. Confirm-password field. After a reset, other sessions are signed out, a "your password was changed" security email is sent, and sign-in opens with the email filled in. The response never reveals whether an account exists. Passwords can't be "sent" (they are stored hashed), only reset. SMS reset needs a provider. |
-| 4 | Onboarding | Done | 10 steps, saved to the server after each step and resumable. |
+| 4 | Onboarding | Done | 10 steps, saved to the server after each step and resumable. Date of birth uses day / month / year scroll wheels (minimum age enforced). Country is a searchable list; the selected country's states/regions are then listed (250 countries, 5,047 states, ODbL data). |
 | 5 | Profile completion | Done | Server computes the percentage and the missing required fields; publishing is blocked until they're complete. |
 | 6 | Dashboard | Done | Real counts, notices and recommendations; nothing invented. |
 | 7 | Discover | Done | Server-side eligibility and privacy rules, filters, paging, empty and error states. |
@@ -147,7 +147,7 @@ Get-NetConnectionProfile
 Then open port 8001 for private networks only. Run this **once**, in PowerShell started with "Run as administrator":
 
 ```powershell
-New-NetFirewallRule -DisplayName "Paird Django dev (8001)" -Direction Inbound -Protocol TCP -LocalPort 8001 -Action Allow -Profile Private
+New-NetFirewallRule -DisplayName "PairD Django dev (8001)" -Direction Inbound -Protocol TCP -LocalPort 8001 -Action Allow -Profile Private
 ```
 
 ### 4. Start Django so other devices can reach it

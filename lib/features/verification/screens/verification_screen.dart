@@ -7,7 +7,7 @@ import '../../../app/theme/app_theme.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../shared/widgets/paird_widgets.dart';
 
-/// Photo verification: a selfie reviewed by Paird staff against profile
+/// Photo verification: a selfie reviewed by PairD staff against profile
 /// photos. Status only changes when staff record a decision on the server.
 class VerificationScreen extends StatefulWidget {
   const VerificationScreen({super.key});
@@ -92,7 +92,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                 ],
                 if (status == 'pending') ...[
                   const SizedBox(height: 16),
-                  const InfoBanner('A member of the Paird team will review your selfie. This page updates when they do.'),
+                  const InfoBanner('A member of the PairD team will review your selfie. This page updates when they do.'),
                 ],
                 const SizedBox(height: 24),
                 if (d['can_submit'] == true && status != 'verified')

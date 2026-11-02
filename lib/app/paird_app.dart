@@ -20,7 +20,7 @@ class PairdApp extends StatelessWidget {
       api: api,
       auth: auth,
       child: MaterialApp(
-        title: 'Paird',
+        title: 'PairD',
         debugShowCheckedModeBanner: false,
         navigatorKey: navigatorKey,
         theme: AppTheme.dark,

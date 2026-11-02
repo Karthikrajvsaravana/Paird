@@ -27,14 +27,14 @@ RESET_RESEND_COOLDOWN = timedelta(seconds=60)
 
 
 def _branded_html(paragraphs, footnote=""):
-    """Paird-styled HTML email body. `paragraphs` are trusted HTML snippets."""
+    """PairD-styled HTML email body. `paragraphs` are trusted HTML snippets."""
     body = "".join(f"<p>{paragraph}</p>" for paragraph in paragraphs)
     note = f'<p style="color:#9CA3AF;font-size:13px">{footnote}</p>' if footnote else ""
     return (
         '<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;'
         'background:#121816;color:#F5F5F0;padding:32px;border-radius:12px">'
-        '<h1 style="font-family:Georgia,serif;color:#E2C078;font-weight:normal;margin:0 0 24px">Paird</h1>'
-        f'{body}{note}<p style="color:#9CA3AF">— The Paird team</p></div>'
+        '<h1 style="font-family:Georgia,serif;color:#E2C078;font-weight:normal;margin:0 0 24px">PairD</h1>'
+        f'{body}{note}<p style="color:#9CA3AF">— The PairD team</p></div>'
     )
 
 
@@ -81,7 +81,7 @@ def create_account(full_name, kind, identifier, password):
 
 def send_welcome_email(user_id):
     """
-    Tell a new member their Paird account was created. Best effort: a mail
+    Tell a new member their PairD account was created. Best effort: a mail
     failure is logged and never undoes or fails the registration.
     """
     identity = AccountIdentity.objects.filter(user_id=user_id).first()
@@ -94,21 +94,21 @@ def send_welcome_email(user_id):
     contact = f"please {_support_contact()}"
     text = (
         f"Hi {first_name},\n\n"
-        "Welcome to Paird! Your account has been created.\n\n"
+        "Welcome to PairD! Your account has been created.\n\n"
         "Next, complete your profile in the app so others can discover you, "
         "and set your partner preferences.\n\n"
         f"If you didn't create this account, {contact} so we can secure it.\n\n"
-        "— The Paird team"
+        "— The PairD team"
     )
     html = _branded_html(
         [
             f"Hi {escape(first_name)},",
-            "<strong>Welcome to Paird!</strong> Your account has been created.",
+            "<strong>Welcome to PairD!</strong> Your account has been created.",
             "Next, complete your profile in the app so others can discover you, and set your partner preferences.",
         ],
         footnote=f"If you didn't create this account, {escape(contact)} so we can secure it.",
     )
-    return _send_email(identity.email, "Welcome to Paird — your account is ready", text, html, "welcome")
+    return _send_email(identity.email, "Welcome to PairD — your account is ready", text, html, "welcome")
 
 
 def issue_tokens(user):
@@ -143,10 +143,10 @@ def start_password_reset(identity):
 
     minutes = int(RESET_CODE_TTL.total_seconds() // 60)
     text = (
-        f"Your Paird password reset code is {code}.\n\n"
+        f"Your PairD password reset code is {code}.\n\n"
         f"Enter it in the app to choose a new password. It expires in {minutes} minutes and can only be used once.\n\n"
         "If you didn't ask to reset your password, you can ignore this email — your password won't change.\n\n"
-        "— The Paird team"
+        "— The PairD team"
     )
     html = _branded_html(
         [
@@ -156,7 +156,7 @@ def start_password_reset(identity):
         ],
         footnote="If you didn't ask to reset your password, you can ignore this email — your password won't change.",
     )
-    return _send_email(identity.email, "Your Paird password reset code", text, html, "password reset")
+    return _send_email(identity.email, "Your PairD password reset code", text, html, "password reset")
 
 
 def send_password_changed_email(user_id):
@@ -169,20 +169,20 @@ def send_password_changed_email(user_id):
     contact = _support_contact()
     text = (
         f"Hi {first_name},\n\n"
-        f"The password for your Paird account was changed on {when}. "
+        f"The password for your PairD account was changed on {when}. "
         "For your security, you've been signed out on your other devices.\n\n"
         f"If this wasn't you, reset your password from the app right away and {contact}.\n\n"
-        "— The Paird team"
+        "— The PairD team"
     )
     html = _branded_html(
         [
             f"Hi {escape(first_name)},",
-            f"The password for your Paird account was changed on <strong>{when}</strong>.",
+            f"The password for your PairD account was changed on <strong>{when}</strong>.",
             "For your security, you've been signed out on your other devices.",
         ],
         footnote=f"If this wasn't you, reset your password from the app right away and {escape(contact)}.",
     )
-    return _send_email(identity.email, "Your Paird password was changed", text, html, "password changed")
+    return _send_email(identity.email, "Your PairD password was changed", text, html, "password changed")
 
 
 @transaction.atomic

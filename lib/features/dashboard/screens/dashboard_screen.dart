@@ -82,7 +82,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final data = _data;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Paird', style: AppTheme.serif(size: 30, color: AppColors.gold).copyWith(letterSpacing: 1.5)),
+        title: Text('PairD', style: AppTheme.serif(size: 30, color: AppColors.gold).copyWith(letterSpacing: 1.5)),
         actions: [
           IconButton(
             tooltip: 'Notifications',

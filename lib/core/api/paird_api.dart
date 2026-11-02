@@ -1,7 +1,7 @@
 import '../models/models.dart';
 import 'api_client.dart';
 
-/// Typed endpoints of the Paird API (backend/*/urls.py).
+/// Typed endpoints of the PairD API (backend/*/urls.py).
 class PairdApi {
   PairdApi(this.client);
   final ApiClient client;
@@ -17,6 +17,35 @@ class PairdApi {
     if (_options != null && !refresh) return _options!;
     _options = AppOptions(_map(await client.get('/options/')));
     return _options!;
+  }
+
+  // Locations (countries and their states; cached per app session) -------------
+  List<Country>? _countries;
+  final _states = <String, List<String>>{};
+
+  Future<List<Country>> countries() async {
+    if (_countries != null) return _countries!;
+    final data = await client.get('/locations/countries/') as List;
+    _countries = [
+      for (final c in data) Country(c['code'] as String, c['name'] as String, c['has_states'] == true),
+    ];
+    return _countries!;
+  }
+
+  Future<Country?> countryNamed(String name) async {
+    final wanted = name.trim().toLowerCase();
+    if (wanted.isEmpty) return null;
+    for (final c in await countries()) {
+      if (c.name.toLowerCase() == wanted || c.code.toLowerCase() == wanted) return c;
+    }
+    return null;
+  }
+
+  Future<List<String>> states(String countryCode) async {
+    final cached = _states[countryCode];
+    if (cached != null) return cached;
+    final data = _map(await client.get('/locations/countries/$countryCode/states/'));
+    return _states[countryCode] = (data['states'] as List).cast<String>();
   }
 
   // Account ------------------------------------------------------------------

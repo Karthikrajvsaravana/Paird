@@ -341,7 +341,7 @@ class VerifiedBadge extends StatelessWidget {
   final double size;
   @override
   Widget build(BuildContext context) => Tooltip(
-        message: 'Photo verified by the Paird team',
+        message: 'Photo verified by the PairD team',
         child: Icon(Icons.verified, color: AppColors.success, size: size, semanticLabel: 'Photo verified'),
       );
 }

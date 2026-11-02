@@ -25,7 +25,7 @@ class WelcomeEmailTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         message = mail.outbox[0]
         self.assertEqual(message.to, ["asha@example.com"])
-        self.assertIn("Welcome to Paird", message.subject)
+        self.assertIn("Welcome to PairD", message.subject)
         self.assertIn("Hi Asha", message.body)
         self.assertIn("account has been created", message.body)
         html = message.alternatives[0][0]

@@ -88,7 +88,7 @@ class _Splash extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Paird', style: AppTheme.serif(size: 44, color: AppColors.gold).copyWith(letterSpacing: 1.5)),
+            Text('PairD', style: AppTheme.serif(size: 44, color: AppColors.gold).copyWith(letterSpacing: 1.5)),
             const SizedBox(height: 24),
             if (error == null)
               const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))

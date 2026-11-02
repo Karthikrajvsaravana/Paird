@@ -12,7 +12,7 @@ from .models import VerificationRequest
 from .services import verification_status
 
 METHOD_DESCRIPTION = (
-    "Photo verification: take a selfie and the Paird team compares it with your profile photos. "
+    "Photo verification: take a selfie and the PairD team compares it with your profile photos. "
     "We don't ask for identity documents. Your selfie is deleted once it has been reviewed."
 )
 

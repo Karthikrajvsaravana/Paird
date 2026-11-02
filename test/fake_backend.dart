@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
-/// Minimal in-memory stand-in for the Paird auth API, used only by tests.
+/// Minimal in-memory stand-in for the PairD auth API, used only by tests.
 class FakeBackend {
   final requests = <http.Request>[];
   final users = <String, ({String password, String name})>{};

@@ -3,15 +3,15 @@
 <plist version="1.0">
 <dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Paird uses the camera to take a selfie for photo verification.</string>
+	<string>PairD uses the camera to take a selfie for photo verification.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Paird lets you choose profile photos from your library.</string>
+	<string>PairD lets you choose profile photos from your library.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Paird</string>
+	<string>PairD</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

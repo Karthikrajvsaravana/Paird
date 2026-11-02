@@ -12,7 +12,7 @@ def selfie_upload_path(instance, filename):
 class VerificationRequest(models.Model):
     """
     Photo verification by manual review: the member submits a live selfie and
-    Paird staff compare it with the member's profile photos in the Django admin.
+    PairD staff compare it with the member's profile photos in the Django admin.
     This is NOT identity-document verification. The selfie is deleted as soon
     as a decision is recorded.
     """

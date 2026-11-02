@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_scope.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/models/models.dart';
+import '../../../core/api/api_exception.dart';
 import '../../../shared/widgets/paird_widgets.dart';
+import '../../../shared/widgets/pickers.dart';
 
 /// Profile sections shared by onboarding and "Edit profile".
 /// Keys match backend/profiles/services.py ONBOARDING_STEPS.
@@ -49,6 +52,24 @@ class SectionFormState extends State<SectionForm> {
   late Set<String> _lookingFor = widget.lookingFor.toSet();
   final Map<String, TextEditingController> _text = {};
   String? _chipError;
+  Country? _country; // resolved from the profile's country name
+  bool _loadingLocation = false;
+  String? _locationError;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.section == 'location' && (widget.profile['country'] ?? '').toString().isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          final country = await AppScope.read(context).api.countryNamed(widget.profile['country'] as String);
+          if (mounted) setState(() => _country = country);
+        } on ApiException {
+          // Picker will retry when opened.
+        }
+      });
+    }
+  }
 
   static const _textFields = [
     'community',
@@ -110,6 +131,10 @@ class SectionFormState extends State<SectionForm> {
         setState(() => _chipError = 'Please select ${entry.value}.');
         return null;
       }
+    }
+    if (widget.section == 'location' && _controller('country').text.trim().isEmpty) {
+      setState(() => _chipError = 'Please choose your country.');
+      return null;
     }
     if (widget.section == 'basics') {
       if (_lookingFor.isEmpty) {
@@ -229,20 +254,17 @@ class SectionFormState extends State<SectionForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const FieldLabel('Date of birth'),
-          OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(alignment: Alignment.centerLeft, minimumSize: const Size.fromHeight(50)),
-            icon: const Icon(Icons.cake_outlined, color: AppColors.gold, size: 20),
-            label: Text(
-              value == null ? 'Select date' : '${value.day}/${value.month}/${value.year}',
-              style: AppTheme.sans(color: value == null ? Colors.grey.shade500 : Colors.white),
-            ),
-            onPressed: () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: value ?? DateTime(latest.year - 5, latest.month, latest.day),
-                firstDate: DateTime(now.year - 100),
-                lastDate: latest,
-                helpText: 'You must be $minAge or older',
+          PickerField(
+            value: value == null ? null : formatBirthDate(value),
+            placeholder: 'Select date',
+            icon: Icons.cake_outlined,
+            onTap: () async {
+              final picked = await showBirthDatePicker(
+                context,
+                initial: value ?? DateTime(latest.year - 5, 1, 1),
+                earliest: DateTime(now.year - 100, 1, 1),
+                latest: latest,
+                helpText: 'You must be $minAge or older to use PairD.',
               );
               if (picked != null) {
                 setState(() => _draft['date_of_birth'] =
@@ -258,6 +280,86 @@ class SectionFormState extends State<SectionForm> {
         ],
       ),
     );
+  }
+
+  Future<void> _pickCountry() async {
+    final api = AppScope.read(context).api;
+    setState(() {
+      _loadingLocation = true;
+      _locationError = null;
+    });
+    try {
+      final countries = await api.countries();
+      if (!mounted) return;
+      final picked = await showSearchablePicker(
+        context,
+        title: 'Country',
+        items: [for (final c in countries) c.name],
+        selected: _controller('country').text,
+        searchHint: 'Search countries',
+      );
+      if (picked == null || !mounted) return;
+      final country = countries.firstWhere((c) => c.name == picked);
+      setState(() {
+        if (_controller('country').text != picked) _controller('state').clear();
+        _controller('country').text = picked;
+        _country = country;
+      });
+    } on ApiException catch (e) {
+      if (mounted) setState(() => _locationError = e.message);
+    } finally {
+      if (mounted) setState(() => _loadingLocation = false);
+    }
+  }
+
+  Future<void> _pickState() async {
+    final country = _country;
+    if (country == null) return;
+    setState(() {
+      _loadingLocation = true;
+      _locationError = null;
+    });
+    try {
+      final states = await AppScope.read(context).api.states(country.code);
+      if (!mounted) return;
+      final picked = await showSearchablePicker(
+        context,
+        title: 'State / region',
+        items: states,
+        selected: _controller('state').text,
+        searchHint: 'Search ${country.name}',
+      );
+      if (picked != null && mounted) setState(() => _controller('state').text = picked);
+    } on ApiException catch (e) {
+      if (mounted) setState(() => _locationError = e.message);
+    } finally {
+      if (mounted) setState(() => _loadingLocation = false);
+    }
+  }
+
+  List<Widget> _locationFields() {
+    final country = _controller('country').text;
+    final state = _controller('state').text;
+    final hasStates = _country?.hasStates ?? true;
+    return [
+      if (_locationError != null) ...[ErrorBanner(_locationError!), const SizedBox(height: 12)],
+      const FieldLabel('Country'),
+      PickerField(value: country, placeholder: 'Select your country', onTap: _loadingLocation ? () {} : _pickCountry),
+      const SizedBox(height: 16),
+      if (country.isNotEmpty && hasStates) ...[
+        const FieldLabel('State / region', optional: true),
+        PickerField(
+          value: state,
+          placeholder: _country == null ? 'Loading…' : 'Select your state',
+          enabled: _country != null && !_loadingLocation,
+          onTap: _pickState,
+        ),
+        const SizedBox(height: 16),
+      ],
+      if (_loadingLocation) const Padding(padding: EdgeInsets.only(bottom: 12), child: LinearProgressIndicator()),
+      _textField('city', 'City', hint: 'e.g. Chennai', maxLength: 80),
+      _chips('open_to_relocate', 'Open to relocating after marriage?', optional: true),
+    ];
   }
 
   List<Widget> _fields() {
@@ -296,12 +398,7 @@ class SectionFormState extends State<SectionForm> {
           _textField('mother_tongue', 'Mother tongue', optional: true, maxLength: 40),
         ];
       case 'location':
-        return [
-          _textField('city', 'City', hint: 'e.g. Chennai', maxLength: 80),
-          _textField('state', 'State / region', optional: true, maxLength: 80),
-          _textField('country', 'Country', hint: 'e.g. India', maxLength: 60),
-          _chips('open_to_relocate', 'Open to relocating after marriage?', optional: true),
-        ];
+        return _locationFields();
       case 'career':
         return [
           _dropdown('education_level', 'Highest education'),

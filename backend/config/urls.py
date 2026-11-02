@@ -1,14 +1,16 @@
-"""URL configuration for the Paird backend. All API routes are versioned under /api/v1/."""
+"""URL configuration for the PairD backend. All API routes are versioned under /api/v1/."""
 
 from django.contrib import admin
 from django.urls import include, path
 
 from core.dashboard import DashboardView
-from core.views import health
+from core.views import CountryListView, StateListView, health
 
 api_v1 = [
     path("health/", health, name="health"),
     path("dashboard/", DashboardView.as_view(), name="dashboard"),
+    path("locations/countries/", CountryListView.as_view(), name="countries"),
+    path("locations/countries/<str:country>/states/", StateListView.as_view(), name="states"),
     path("", include("accounts.urls")),
     path("", include("profiles.urls")),
     path("", include("matching.urls")),

@@ -1,6 +1,6 @@
-# Paird
+# PairD
 
-Paird is a matrimony app: a Flutter client (Android first) backed by a Django REST Framework API on Supabase-hosted PostgreSQL.
+PairD is a matrimony app: a Flutter client (Android first) backed by a Django REST Framework API on Supabase-hosted PostgreSQL.
 
 ## Contents
 
@@ -37,7 +37,7 @@ lib/
   main.dart                  bootstraps services and PairdApp
   app/                       PairdApp, AuthGate (routing by session state), AppScope, theme
   core/                      ApiClient (token refresh), PairdApi, AuthController, models, validators
-  shared/widgets/            reusable widgets in the Paird style
+  shared/widgets/            reusable widgets in the PairD style
   features/                  auth, onboarding, dashboard, discover, matches, messaging,
                              profile, settings, verification, premium, notifications, safety
 test/                        Flutter unit and widget tests
@@ -184,6 +184,7 @@ Every error uses the same envelope:
 | Health | `GET health/` (public) |
 | Auth | `POST auth/register/`, `auth/login/`, `auth/refresh/`, `auth/logout/`; `GET/PATCH auth/me/`; `POST auth/change-password/`, `auth/password-reset/`, `auth/password-reset/confirm/` |
 | Account | `GET/PATCH settings/` (privacy and notifications); `POST account/deactivate/`, `account/reactivate/`, `account/delete/` |
+| Locations | `GET locations/countries/`; `GET locations/countries/<code>/states/` (country and state pickers; profile and preference countries are validated against this list) |
 | Profile | `GET options/`; `GET/PATCH profile/me/`; `POST profile/me/publish/`; `GET/PUT/PATCH preferences/` |
 | Photos | `GET/POST photos/`; `PATCH/DELETE photos/<id>/`; `GET photos/<id>/file/` (authorised stream) |
 | Members | `GET members/<user_id>/` (privacy-filtered) |
@@ -252,7 +253,7 @@ Scoped throttles apply to authentication, interests, messages, uploads and repor
 ## Android release
 
 What's already done:
-- `INTERNET` permission and the "Paird" label in the main manifest
+- `INTERNET` permission and the "PairD" label in the main manifest
 - Cleartext HTTP allowed in debug builds only
 - `allowBackup=false`
 - Release signing read from `android/key.properties` (gitignored)
@@ -277,6 +278,10 @@ flutter build appbundle --release --dart-define=API_BASE_URL=https://api.your-do
 ```
 
 The outputs are `build\app\outputs\flutter-apk\app-release.apk` and `build\app\outputs\bundle\release\app-release.aab`.
+
+## Data licences
+
+Country and state names come from the Countries States Cities Database (ODbL 1.0). See `backend/core/data/LOCATIONS_LICENSE.md` for the attribution and source notices.
 
 ## Known limitations and external blockers
 

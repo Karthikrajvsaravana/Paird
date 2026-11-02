@@ -11,7 +11,7 @@ from .models import Subscription
 PLANS = [
     {
         "id": "free",
-        "name": "Paird Free",
+        "name": "PairD Free",
         "features": [
             "Create a full profile and partner preferences",
             "Discover profiles and see Vibe Scores",
@@ -21,7 +21,7 @@ PLANS = [
     },
     {
         "id": "premium",
-        "name": "Paird Premium",
+        "name": "PairD Premium",
         "features": [
             "Unlimited interests",
             "Everything in Free",

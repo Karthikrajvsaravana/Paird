@@ -178,7 +178,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               controlAffinity: ListTileControlAffinity.leading,
               title: Text(
                 'I am at least ${options.minAge} years old, I am looking for marriage, the information in my profile '
-                'is true, and I agree that Paird shows my profile to other members according to my privacy settings.',
+                'is true, and I agree that PairD shows my profile to other members according to my privacy settings.',
                 style: AppTheme.sans(size: 13, color: AppColors.textLabel),
               ),
               onChanged: (v) => setState(() => _consent = v ?? false),
@@ -229,7 +229,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     onPressed: _saving ? null : () => setState(() => _index -= 1),
                   )
                 : null,
-            title: Text('Paird', style: AppTheme.serif(size: 28, color: AppColors.gold)),
+            title: Text('PairD', style: AppTheme.serif(size: 28, color: AppColors.gold)),
             actions: [
               TextButton(
                 onPressed: () => AppScope.read(context).auth.signOut(),
