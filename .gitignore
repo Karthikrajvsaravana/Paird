@@ -66,3 +66,6 @@ htmlcov/
 *.jks
 *.keystore
 android/key.properties
+
+# Per-PC Flutter settings (contains your LAN IP); see config/README.md
+config/dev.json
