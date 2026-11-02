@@ -49,6 +49,10 @@ SECRET_KEY = require_env("DJANGO_SECRET_KEY")
 DEBUG = env_bool("DJANGO_DEBUG", False)
 
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
+if DEBUG:
+    # Local development: this PC's own browser (admin, health check) always works,
+    # whatever LAN IP is listed for the phone. Production stays strict.
+    ALLOWED_HOSTS += [host for host in ("localhost", "127.0.0.1", "[::1]") if host not in ALLOWED_HOSTS]
 
 
 # Application definition
