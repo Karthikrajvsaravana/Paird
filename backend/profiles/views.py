@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.db.models import Max
-from django.http import FileResponse, HttpResponseRedirect
+from django.http import FileResponse
 from django.utils import timezone
 from rest_framework import exceptions, status
 from rest_framework.response import Response
@@ -187,8 +187,8 @@ class PhotoFileView(APIView):
                 raise exceptions.NotFound()
             if not audience_allows(profile.photo_visibility, relationship(request.user, photo.user_id)):
                 raise exceptions.NotFound()
-        if settings.STORAGE_BACKEND == "s3":
-            return HttpResponseRedirect(photo.image.url)  # short-lived signed URL
+        # Streamed through the API for every storage backend: the bucket stays
+        # private and the app's Authorization header never reaches the bucket.
         response = FileResponse(photo.image.open("rb"), content_type="image/jpeg")
         response["Cache-Control"] = "private, max-age=300"
         response["X-Content-Type-Options"] = "nosniff"

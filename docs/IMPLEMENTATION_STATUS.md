@@ -217,7 +217,7 @@ flutter test
 | Firebase Cloud Messaging | Push notifications | In-app notifications and badges only. |
 | Google Play Billing (or Stripe) and server receipt verification | Buying Premium | Purchases disabled. Staff can grant Premium in the admin. |
 | KYC / ID provider | Identity-document verification | Staff photo review only, labelled honestly. |
-| Private S3-compatible storage (e.g. Supabase Storage) | Photos in production | Photos are stored on the server's disk (`backend/media`, gitignored). |
+| Private Supabase Storage bucket (`STORAGE_BACKEND=s3`, `STORAGE_S3_*`) | Keeping photos off the PC / server disk | Implemented and tested against an S3-compatible test server; needs your bucket and keys. Without them, photos are saved in `backend/media` (gitignored). Check with `paird_storagecheck`; move existing photos with `paird_move_media`. |
 | Redis plus Django Channels | Real-time chat | Polling (5 s in chat, 30 s list, 60 s badges). |
 | HTTPS hosting and a domain | Release builds and production | Debug builds over LAN only. |
 

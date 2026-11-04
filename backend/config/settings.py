@@ -176,25 +176,39 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Uploaded files (profile photos, verification selfies). These are never
 # served publicly: the API streams them after an authorization check.
+#
+# STORAGE_BACKEND=filesystem  -> files in MEDIA_ROOT on this computer (dev only)
+# STORAGE_BACKEND=s3          -> a PRIVATE bucket in Supabase Storage (or any
+#                                S3-compatible storage). Nothing is written
+#                                to this computer's disk.
 MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", BASE_DIR / "media"))
 
 STORAGE_BACKEND = os.environ.get("STORAGE_BACKEND", "filesystem").strip().lower()
 if STORAGE_BACKEND == "s3":
-    # S3-compatible object storage (e.g. Supabase Storage's S3 endpoint).
-    # Requires `pip install django-storages[s3]`. Use a PRIVATE bucket.
+    try:
+        import storages  # noqa: F401
+    except ImportError:
+        raise ImproperlyConfigured(
+            "STORAGE_BACKEND=s3 needs the django-storages package. Run: "
+            ".\\backend\\.venv\\Scripts\\python.exe -m pip install -r .\\backend\\requirements.txt"
+        ) from None
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.s3.S3Storage",
             "OPTIONS": {
                 "bucket_name": require_env("STORAGE_S3_BUCKET"),
                 "endpoint_url": require_env("STORAGE_S3_ENDPOINT_URL"),
-                "region_name": os.environ.get("STORAGE_S3_REGION", ""),
+                "region_name": require_env("STORAGE_S3_REGION"),
                 "access_key": require_env("STORAGE_S3_ACCESS_KEY_ID"),
                 "secret_key": require_env("STORAGE_S3_SECRET_ACCESS_KEY"),
+                # Supabase's S3 endpoint needs path-style URLs and SigV4.
+                "addressing_style": "path",
+                "signature_version": "s3v4",
                 "default_acl": None,
                 "querystring_auth": True,
                 "querystring_expire": 300,
                 "file_overwrite": False,
+                "location": os.environ.get("STORAGE_S3_PREFIX", "").strip("/"),
             },
         },
         "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},

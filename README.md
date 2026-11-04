@@ -242,7 +242,7 @@ Scoped throttles apply to authentication, interests, messages, uploads and repor
    - `DJANGO_BEHIND_HTTPS_PROXY=True` if TLS terminates at a proxy
 3. **Static and media files:**
    - Run `manage.py collectstatic`.
-   - For uploads, use a **private** S3-compatible bucket. Supabase Storage provides an S3 endpoint: `pip install "django-storages[s3]"`, set `STORAGE_BACKEND=s3` and the `STORAGE_S3_*` variables. Never make the bucket public. The API serves short-lived signed URLs after its own authorisation check.
+   - For uploads, use a **private** Supabase Storage bucket: set `STORAGE_BACKEND=s3` and the `STORAGE_S3_*` variables (see `.env.example`), then run `manage.py paird_storagecheck`. `manage.py paird_move_media` copies photos already saved on disk into the bucket. Never make the bucket public: the API streams each photo after its own permission check.
 4. **Shared cache:** with more than one process, configure a shared cache (for example Redis) so throttling works across processes.
 5. **Email:** configure SMTP (`EMAIL_*`) to send welcome emails after email sign-up and password reset codes. Welcome emails are sent only after the account is saved, and a mail failure never fails registration (`PAIRD_WELCOME_EMAIL_ENABLED`, `PAIRD_SUPPORT_EMAIL`).
 6. **Scheduled expiry (optional):** schedule `manage.py expire_interests` hourly. Expiry is also enforced on every request.
