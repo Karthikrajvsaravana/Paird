@@ -157,17 +157,69 @@ These are server-side rules. The app only displays them. Values marked as settin
 | Deactivation | Hides the profile, and stops new interests and messages. Reversible by the member. |
 | Deletion | Permanent. Requires the password. Removes the profile, photos (including stored files), interests, matches and messages. |
 
-## Vibe Score
+## Vibe Score and AI matching
 
-The Vibe Score is a **preference-fit percentage**. It is **not** a prediction of compatibility, and the app says so wherever it is shown.
+PairD matching has two layers.
 
-1. Take each partner-preference criterion the viewer has set: age, height, marital status, religion, countries, relocation, education, career, minimum income, children, marriage timeline, living arrangement, diet, smoking, drinking.
-2. Skip any criterion whose value on the candidate's profile the viewer is not allowed to see. For example, income is hidden from non-matches by default, and lifestyle can be restricted.
-3. A criterion is met if the candidate's value satisfies it. An unanswered field counts as not met.
-4. Score = `round(100 × met / considered)`, with equal weights.
-5. With no scorable preferences set, the score is `null` and no badge is shown.
+### 1. Match engine: the Vibe Score (rules-based, always on)
 
-The breakdown returns only category labels and met/not-met. It never reveals hidden values or the other member's own preferences. The implementation is `backend/matching/compatibility.py`, and the tests are in `matching/tests`.
+`backend/matching/compatibility.py` scores how well two members fit **each other**, from 0 to 100. It is deterministic, free to run, and tested.
+
+| Factor | Weight | How it's scored |
+|---|---|---|
+| Your preferences | 30 | Share of the partner preferences *you* set that they meet (only fields you're allowed to see) |
+| What they're looking for | 30 | Share of *their* preferences you meet. It's applied, but their preferences are never shown to you. |
+| Children | 12 | Same answer 1.0, "open" 0.7. Yes vs no is a **deal-breaker** that caps the total at 35. |
+| Marriage timeline | 9 | Same 1.0, adjacent 0.7, otherwise 0.35. "Not sure" 0.6. |
+| Lifestyle | 8 | Diet, smoking and drinking similarity, used only if their lifestyle is visible to you |
+| Location | 6 | Same city 1.0, same state 0.85, same country 0.7. Abroad depends on willingness to relocate. |
+| Family values | 3 | Same 1.0, adjacent 0.7 |
+| Living arrangement | 2 | Same 1.0, "flexible" 0.8 |
+
+How the total is calculated:
+- Only factors with data on both sides count.
+- Unmet stated preferences then **scale the total down**, from either side, so shared hobbies can't outweigh what someone explicitly asked for. Each side's factor is `0.7 + 0.3 × fit`.
+- Religion, education, income and occupation count **only through members' own preferences**. The engine never assumes anything from them on its own.
+
+Discover (sort **Best matches**, the default) and the dashboard recommendations use this score. The Vibe Score shown in the app is this score, with a breakdown that lists only factor names.
+
+### 2. AI match insight (Anthropic Claude, optional)
+
+When a member opens a profile, the backend (`backend/matching/ai.py`) asks Claude (`claude-opus-5-5` by default) for a short assessment:
+- a rating (Strong / Good / Worth exploring / Low);
+- a summary, what fits, and what's worth talking about;
+- a conversation opener.
+
+**What Claude sees:**
+- The viewer's own profile and preferences.
+- Only what the viewer is allowed to see of the other member.
+- Never: names, email or phone, photos, exact date of birth, community, or the other member's own preferences.
+- Free text such as "about me" is passed as data, so a profile can't instruct the AI.
+
+**Controls:**
+- Insights are cached per pair, and recomputed only when the data sent would change.
+- Each member gets a daily limit of new insights (`PAIRD_AI_DAILY_LIMIT`).
+- Members can opt out in Settings → **AI match insights**. If either member opts out, no insight is made.
+- Refusals use `fallbacks: "default"`.
+- If anything fails, the card shows a calm message and no partial insight is stored.
+
+**Turning it on:**
+1. Set `ANTHROPIC_API_KEY` in `backend/.env`; it stays on the backend only.
+2. Install the requirements.
+3. Restart the backend.
+
+Without a key, the AI card is hidden and everything else works.
+
+Cost is a few US cents per new insight at Claude Opus 5.5 prices; cached insights cost nothing. Mention AI processing in your privacy policy before launch.
+
+### Demo profiles for testing
+
+```powershell
+.\backend\.venv\Scripts\python.exe .\backend\manage.py paird_seed_demo
+.\backend\.venv\Scripts\python.exe .\backend\manage.py paird_seed_demo --remove
+```
+
+The first command creates 10 women and 10 men, the second removes them all. They use `@demo.paird.test` emails, the password `PairD-Demo-2026!` (change it with `--password`), generated initials photos, and an "(Demo profile for testing.)" note on each profile. The profiles are designed as 10 intended pairs, and `matching/tests/test_engine.py` checks that the engine ranks every member's intended partner first. **Never run this on a production database with real members.**
 
 ## API reference
 
@@ -187,8 +239,8 @@ Every error uses the same envelope:
 | Locations | `GET locations/countries/`; `GET locations/countries/<code>/states/` (country and state pickers; profile and preference countries are validated against this list) |
 | Profile | `GET options/`; `GET/PATCH profile/me/`; `POST profile/me/publish/`; `GET/PUT/PATCH preferences/` |
 | Photos | `GET/POST photos/`; `PATCH/DELETE photos/<id>/`; `GET photos/<id>/file/` (authorised stream) |
-| Members | `GET members/<user_id>/` (privacy-filtered) |
-| Discovery | `GET discover/?page=&age_min=&age_max=&religion=&country=&city=&education_level=&marital_status=&marriage_timeline=&verified_only=&with_photo=` |
+| Members | `GET members/<user_id>/` (privacy-filtered); `GET members/<user_id>/insight/` (AI match insight: `{status, insight, message}`) |
+| Discovery | `GET discover/?sort=best\|recent&page=&age_min=&age_max=&religion=&country=&city=&education_level=&marital_status=&marriage_timeline=&verified_only=&with_photo=` |
 | Dashboard | `GET dashboard/` |
 | Interests | `GET interests/?direction=received\|sent&status=pending\|…`; `POST interests/`; `POST interests/<id>/accept\|decline\|withdraw/` |
 | Matches | `GET matches/`; `POST matches/<id>/end/` |

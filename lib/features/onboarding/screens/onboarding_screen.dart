@@ -77,6 +77,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         'income_visibility',
         'lifestyle_visibility',
         'show_last_seen',
+        'allow_ai_insights',
       ])
         k: _profile[k],
     };

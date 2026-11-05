@@ -88,3 +88,29 @@ class Match(models.Model):
     @staticmethod
     def ordered(a_id, b_id):
         return (a_id, b_id) if a_id < b_id else (b_id, a_id)
+
+
+class MatchInsight(models.Model):
+    """
+    Cached AI assessment of `candidate` for `viewer`. `input_hash` covers the
+    exact profile data sent to the model, so edits to either profile (or a
+    privacy change) produce a fresh insight instead of a stale one.
+    """
+
+    RATINGS = [("strong", "Strong match"), ("good", "Good match"), ("possible", "Worth exploring"), ("low", "Low match")]
+
+    viewer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    candidate = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    input_hash = models.CharField(max_length=64)
+    rating = models.CharField(max_length=10, choices=RATINGS)
+    score = models.PositiveSmallIntegerField()
+    summary = models.CharField(max_length=600)
+    strengths = models.JSONField(default=list)
+    considerations = models.JSONField(default=list)
+    conversation_starter = models.CharField(max_length=300, blank=True)
+    model = models.CharField(max_length=60)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["viewer", "candidate"], name="unique_insight_per_pair")]
+        indexes = [models.Index(fields=["viewer", "-created_at"])]

@@ -88,7 +88,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final activeFilters = _filters.values.where((v) => v != null && v != false && v != '' && !(v is List && v.isEmpty)).length;
+    final activeFilters = _filters.entries
+        .where((e) => e.key != 'sort' && e.value != null && e.value != false && e.value != '' && !(e.value is List && (e.value as List).isEmpty))
+        .length;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Discover'),
@@ -144,7 +146,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
                 if (index == 0) {
-                  return Text('$_count ${_count == 1 ? 'profile' : 'profiles'} for you',
+                  return Text(
+                      '$_count ${_count == 1 ? 'profile' : 'profiles'} for you · '
+                      '${_filters['sort'] == 'recent' ? 'recently active first' : 'best matches first'}',
                       style: AppTheme.sans(size: 13, color: AppColors.textSecondary));
                 }
                 if (index == _items.length + 1) {
@@ -221,6 +225,13 @@ class _FilterSheetState extends State<_FilterSheet> {
             ),
             Text('Filters apply on top of your partner preferences.',
                 style: AppTheme.sans(size: 12, color: AppColors.textSecondary)),
+            const SizedBox(height: 16),
+            const FieldLabel('Sort by'),
+            ChoiceChips(
+              options: const [(value: 'best', label: 'Best matches'), (value: 'recent', label: 'Recently active')],
+              selected: {(_f['sort'] as String?) ?? 'best'},
+              onChanged: (s) => setState(() => _f['sort'] = s.isEmpty ? 'best' : s.first),
+            ),
             const SizedBox(height: 16),
             FieldLabel('Age: ${age.start.round()} – ${age.end.round()}'),
             RangeSlider(

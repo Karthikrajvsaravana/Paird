@@ -11,8 +11,8 @@ from safety.services import blocked_user_ids
 from verification.services import verified_user_ids
 
 from . import services
-from .compatibility import vibe_score
-from .discovery import discover, parse_filters
+from .compatibility import vibe_for
+from .discovery import discover, parse_filters, rank_by_match
 from .models import Interest, Match
 
 
@@ -36,6 +36,9 @@ class DiscoverView(APIView):
             raise exceptions.PermissionDenied("Complete your profile to start discovering matches.")
         filters = parse_filters(request.query_params)
         candidates = discover(request.user, filters)
+        vibes = {}
+        if filters["sort"] == "best":
+            candidates, vibes = rank_by_match(request.user, candidates)
         page, size = _page_params(request)
         start = (page - 1) * size
         page_items = candidates[start : start + size]
@@ -51,7 +54,7 @@ class DiscoverView(APIView):
                 request=request,
                 rel=OTHER,
                 verified=profile.user_id in verified,
-                vibe=vibe_score(pref, profile, OTHER),
+                vibe=vibes.get(profile.user_id) or vibe_for(request.user, profile, OTHER, viewer_pref=pref),
                 connection=connections[profile.user_id],
             )
             for profile in page_items

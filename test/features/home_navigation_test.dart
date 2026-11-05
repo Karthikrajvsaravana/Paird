@@ -101,7 +101,7 @@ void main() {
 
     await tester.tap(find.text('Discover'));
     await tester.pumpAndSettle();
-    expect(find.text('1 profile for you'), findsOneWidget);
+    expect(find.text('1 profile for you · best matches first'), findsOneWidget);
     expect(find.text('Vibe 75%'), findsOneWidget);
 
     await tester.tap(find.text('Arjun M.'));

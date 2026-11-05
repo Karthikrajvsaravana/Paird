@@ -5,7 +5,7 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from core.tests.helpers import client_for, make_user
-from matching.compatibility import vibe_score
+from matching.compatibility import preference_fit as vibe_score
 from matching.models import Interest, Match
 from messaging.models import Conversation
 from profiles.services import OTHER, get_preference

@@ -11,4 +11,5 @@ urlpatterns = [
     path("photos/<int:photo_id>/", views.PhotoDetailView.as_view(), name="photo-detail"),
     path("photos/<int:photo_id>/file/", views.PhotoFileView.as_view(), name="photo-file"),
     path("members/<int:user_id>/", views.MemberProfileView.as_view(), name="member-profile"),
+    path("members/<int:user_id>/insight/", views.MemberInsightView.as_view(), name="member-insight"),
 ]

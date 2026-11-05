@@ -78,6 +78,7 @@ REST_FRAMEWORK = {
         "messages": "1000/min",
         "reports": "1000/min",
         "uploads": "1000/min",
+        "ai": "1000/min",
         "anon": "1000/min",
     },
 }

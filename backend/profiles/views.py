@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.throttles import ScopedThrottle
-from matching.compatibility import vibe_score
+from matching.compatibility import vibe_for
 from matching.services import connection_map
 from verification.services import is_verified
 
@@ -209,7 +209,7 @@ class MemberProfileView(APIView):
         else:
             rel = relationship(request.user, user_id)
             connection = connection_map(request.user, [user_id])[user_id]
-            vibe = vibe_score(get_preference(request.user), profile, rel)
+            vibe = vibe_for(request.user, profile, rel)
         return Response(
             public_profile(
                 profile,
@@ -221,3 +221,25 @@ class MemberProfileView(APIView):
                 verified=is_verified(profile.user),
             )
         )
+
+
+class MemberInsightView(APIView):
+    """AI match insight for another member (cached; generated on first request)."""
+
+    throttle_classes = [ScopedThrottle]
+    throttle_scope = "ai"
+    throttle_methods = ("GET",)
+
+    def get(self, request, user_id):
+        from matching.ai import AIUnavailable, insight_for, insight_payload
+
+        profile = Profile.objects.select_related("user").filter(user_id=user_id).first()
+        if profile is None or profile.user_id == request.user.id or not can_view_profile(request.user, profile):
+            raise exceptions.NotFound("This profile is not available.")
+        try:
+            status_value, result = insight_for(request.user, profile, relationship(request.user, user_id))
+        except AIUnavailable as exc:
+            return Response({"status": "unavailable", "insight": None, "message": str(exc)})
+        if status_value == "ready":
+            return Response({"status": "ready", "insight": insight_payload(result), "message": None})
+        return Response({"status": "unavailable", "insight": None, "message": result})

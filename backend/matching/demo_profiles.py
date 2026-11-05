@@ -1,0 +1,266 @@
+"""
+Demo members for testing matching (10 women, 10 men). Each woman has an
+intended best match among the men (same `pair` number), designed around
+shared plans, values and lifestyle; the match engine test checks that the
+engine agrees. Never load these into a production database.
+"""
+
+from datetime import date
+
+DEMO_EMAIL_DOMAIN = "demo.paird.test"
+DEMO_NOTE = "\n\n(Demo profile for testing.)"
+
+# Shared defaults; each profile overrides what differs.
+_BASE = {"marital_status": "never_married", "smoking": "no", "drinking": "no", "employment_type": "employed"}
+
+WOMEN = [
+    {
+        "pair": 1, "name": "Ananya Iyer", "dob": date(1998, 3, 14), "height_cm": 162,
+        "city": "Chennai", "state": "Tamil Nadu", "country": "India", "open_to_relocate": "maybe",
+        "religion": "hindu", "mother_tongue": "Tamil", "education_level": "masters", "education_field": "Computer Science",
+        "occupation": "Software engineer", "annual_income": 1800000, "income_currency": "INR",
+        "family_type": "nuclear", "family_values": "moderate", "diet": "vegetarian",
+        "wants_children": "yes", "marriage_timeline": "6_to_12_months", "living_arrangement": "flexible",
+        "about_family": "Parents are teachers; one younger brother in college.",
+        "about_me": "I build payment apps by day and learn Carnatic violin by night. Love filter coffee, long walks on the beach and planning trips I actually take.",
+        "pref": {"age_min": 27, "age_max": 33, "religions": ["hindu"], "countries": ["India"], "diets": ["vegetarian", "eggetarian"],
+                 "wants_children": ["yes", "open"], "marriage_timelines": ["6_to_12_months", "1_to_2_years"]},
+    },
+    {
+        "pair": 2, "name": "Priya Nair", "dob": date(1999, 7, 2), "height_cm": 158,
+        "city": "Kochi", "state": "Kerala", "country": "India", "open_to_relocate": "yes",
+        "religion": "hindu", "mother_tongue": "Malayalam", "education_level": "professional", "education_field": "Medicine",
+        "occupation": "Doctor (paediatrics resident)",
+        "family_type": "nuclear", "family_values": "liberal", "diet": "non_vegetarian", "drinking": "socially",
+        "wants_children": "yes", "marriage_timeline": "1_to_2_years", "living_arrangement": "independent",
+        "about_family": "Close-knit family; my sister is an architect in Bengaluru.",
+        "about_me": "Paediatrics keeps me busy and happy. Off shift you'll find me swimming, cooking Kerala fish curry or binge-watching Malayalam thrillers.",
+        "pref": {"age_min": 27, "age_max": 33, "education_levels": ["masters", "professional", "doctorate"],
+                 "wants_children": ["yes"], "marriage_timelines": ["1_to_2_years", "6_to_12_months"], "living_arrangements": ["independent", "flexible"]},
+    },
+    {
+        "pair": 3, "name": "Sara Thomas", "dob": date(1996, 11, 21), "height_cm": 165,
+        "city": "Bengaluru", "state": "Karnataka", "country": "India", "open_to_relocate": "maybe",
+        "religion": "christian", "mother_tongue": "Malayalam", "education_level": "masters", "education_field": "Architecture",
+        "occupation": "Architect", "annual_income": 2400000, "income_currency": "INR",
+        "family_type": "nuclear", "family_values": "moderate", "diet": "non_vegetarian", "drinking": "socially",
+        "wants_children": "open", "marriage_timeline": "6_to_12_months", "living_arrangement": "independent",
+        "about_family": "Dad runs a bakery in Kottayam, mum is a nurse.",
+        "about_me": "I design homes that let in light. Weekends are for sketching in cafés, trekking in the Western Ghats and Sunday lunch with friends.",
+        "pref": {"age_min": 28, "age_max": 36, "religions": ["christian"], "countries": ["India"],
+                 "marriage_timelines": ["6_to_12_months", "1_to_2_years"]},
+    },
+    {
+        "pair": 4, "name": "Fatima Sheikh", "dob": date(2000, 1, 9), "height_cm": 157,
+        "city": "Hyderabad", "state": "Telangana", "country": "India", "open_to_relocate": "no",
+        "religion": "muslim", "mother_tongue": "Urdu", "education_level": "bachelors", "education_field": "Education",
+        "occupation": "School teacher",
+        "family_type": "joint", "family_values": "traditional", "diet": "non_vegetarian",
+        "wants_children": "yes", "marriage_timeline": "within_6_months", "living_arrangement": "with_family",
+        "about_family": "We are a big joint family in Tolichowki; my father runs a textile shop.",
+        "about_me": "I teach Class 4 and love it. Faith and family come first for me. I enjoy calligraphy, baking and long conversations over chai.",
+        "pref": {"age_min": 25, "age_max": 32, "religions": ["muslim"], "countries": ["India"],
+                 "wants_children": ["yes"], "marriage_timelines": ["within_6_months", "6_to_12_months"], "living_arrangements": ["with_family", "flexible"]},
+    },
+    {
+        "pair": 5, "name": "Simran Kaur", "dob": date(1997, 5, 30), "height_cm": 166,
+        "city": "Toronto", "state": "Ontario", "country": "Canada", "open_to_relocate": "no",
+        "religion": "sikh", "mother_tongue": "Punjabi", "education_level": "bachelors", "education_field": "Nursing",
+        "occupation": "Registered nurse", "annual_income": 85000, "income_currency": "CAD",
+        "family_type": "nuclear", "family_values": "moderate", "diet": "non_vegetarian",
+        "wants_children": "yes", "marriage_timeline": "6_to_12_months", "living_arrangement": "independent",
+        "about_family": "Moved to Canada from Ludhiana at 12; my parents and brother live nearby in Brampton.",
+        "about_me": "ICU nurse who still finds time for bhangra classes and hockey games. Looking for someone settled in Canada who loves family dinners as much as I do.",
+        "pref": {"age_min": 28, "age_max": 35, "religions": ["sikh"], "countries": ["Canada"],
+                 "wants_children": ["yes"], "marriage_timelines": ["6_to_12_months", "1_to_2_years"]},
+    },
+    {
+        "pair": 6, "name": "Meera Joshi", "dob": date(1995, 9, 12), "height_cm": 160,
+        "city": "Pune", "state": "Maharashtra", "country": "India", "open_to_relocate": "yes",
+        "religion": "hindu", "mother_tongue": "Marathi", "education_level": "professional", "education_field": "Chartered Accountancy",
+        "occupation": "Chartered accountant", "annual_income": 3000000, "income_currency": "INR",
+        "family_type": "nuclear", "family_values": "liberal", "diet": "vegetarian",
+        "wants_children": "no", "marriage_timeline": "1_to_2_years", "living_arrangement": "independent",
+        "about_family": "My parents are retired bankers who travel more than I do.",
+        "about_me": "Numbers by profession, marathons by passion. I'm clear that I don't want children, and I'd love a partner who wants a life of travel, books and building something together.",
+        "pref": {"age_min": 29, "age_max": 37, "countries": ["India"], "wants_children": ["no"],
+                 "diets": ["vegetarian", "vegan", "eggetarian"], "smoking": ["no"]},
+    },
+    {
+        "pair": 7, "name": "Neha Gupta", "dob": date(1999, 2, 18), "height_cm": 163,
+        "city": "New Delhi", "state": "Delhi", "country": "India", "open_to_relocate": "yes",
+        "religion": "hindu", "mother_tongue": "Hindi", "education_level": "masters", "education_field": "Marketing (MBA)",
+        "occupation": "Brand manager", "annual_income": 2200000, "income_currency": "INR",
+        "family_type": "nuclear", "family_values": "moderate", "diet": "eggetarian", "drinking": "socially",
+        "wants_children": "yes", "marriage_timeline": "within_6_months", "living_arrangement": "flexible",
+        "about_family": "Dad is a doctor, mum runs a boutique; one married elder sister.",
+        "about_me": "I launch snack brands for a living, so yes, I'll judge your chips. I love Bollywood dance, weekend road trips to the hills and hosting big Diwali parties.",
+        "pref": {"age_min": 27, "age_max": 33, "religions": ["hindu"], "countries": ["India"],
+                 "wants_children": ["yes"], "marriage_timelines": ["within_6_months", "6_to_12_months"]},
+    },
+    {
+        "pair": 8, "name": "Riya Patel", "dob": date(1998, 8, 25), "height_cm": 159,
+        "city": "Ahmedabad", "state": "Gujarat", "country": "India", "open_to_relocate": "no",
+        "religion": "jain", "mother_tongue": "Gujarati", "education_level": "bachelors", "education_field": "Pharmacy",
+        "occupation": "Pharmacist",
+        "family_type": "joint", "family_values": "traditional", "diet": "jain",
+        "wants_children": "yes", "marriage_timeline": "6_to_12_months", "living_arrangement": "with_family",
+        "about_family": "Joint family of nine; we run a pharmacy chain together.",
+        "about_me": "Simple, family-oriented and a foodie (strictly Jain!). I love garba during Navratri, temple visits with my grandmother and trying new Gujarati recipes.",
+        "pref": {"age_min": 26, "age_max": 33, "religions": ["jain"], "diets": ["jain", "vegetarian"],
+                 "wants_children": ["yes"], "living_arrangements": ["with_family"]},
+    },
+    {
+        "pair": 9, "name": "Aisha Khan", "dob": date(1996, 4, 7), "height_cm": 164,
+        "city": "Dubai", "state": "Dubai", "country": "United Arab Emirates", "open_to_relocate": "yes",
+        "religion": "muslim", "mother_tongue": "Hindi", "education_level": "masters", "education_field": "Finance",
+        "occupation": "Financial analyst", "annual_income": 240000, "income_currency": "AED",
+        "family_type": "nuclear", "family_values": "liberal", "diet": "non_vegetarian",
+        "wants_children": "open", "marriage_timeline": "1_to_2_years", "living_arrangement": "independent",
+        "about_family": "Grew up in Lucknow; my parents moved to Dubai when I started working.",
+        "about_me": "Analyst, amateur photographer and desert-sunset chaser. Happy to relocate for the right person — I care more about shared values than postcodes.",
+        "pref": {"age_min": 29, "age_max": 36, "religions": ["muslim"],
+                 "marriage_timelines": ["1_to_2_years", "6_to_12_months"], "requires_relocation_openness": True},
+    },
+    {
+        "pair": 10, "name": "Kavya Reddy", "dob": date(2000, 6, 16), "height_cm": 161,
+        "city": "Hyderabad", "state": "Telangana", "country": "India", "open_to_relocate": "maybe",
+        "religion": "hindu", "mother_tongue": "Telugu", "education_level": "bachelors", "education_field": "Design",
+        "occupation": "UX designer", "annual_income": 1400000, "income_currency": "INR",
+        "family_type": "nuclear", "family_values": "moderate", "diet": "non_vegetarian",
+        "wants_children": "yes", "marriage_timeline": "not_sure", "living_arrangement": "flexible",
+        "about_family": "Parents are software engineers; younger sister is a dancer.",
+        "about_me": "I design apps people (hopefully) enjoy using. Into board games, indie music gigs and the best biryani spots in town. Taking my time to find the right person.",
+        "pref": {"age_min": 25, "age_max": 31, "countries": ["India"], "wants_children": ["yes", "open"]},
+    },
+]
+
+MEN = [
+    {
+        "pair": 1, "name": "Karthik Raman", "dob": date(1996, 1, 28), "height_cm": 175,
+        "city": "Bengaluru", "state": "Karnataka", "country": "India", "open_to_relocate": "yes",
+        "religion": "hindu", "mother_tongue": "Tamil", "education_level": "masters", "education_field": "Data Science",
+        "occupation": "Data scientist", "annual_income": 2600000, "income_currency": "INR",
+        "family_type": "nuclear", "family_values": "moderate", "diet": "vegetarian",
+        "wants_children": "yes", "marriage_timeline": "6_to_12_months", "living_arrangement": "flexible",
+        "about_family": "Originally from Madurai; my parents are both doctors.",
+        "about_me": "Data scientist who plays the mridangam and never says no to a good dosa. Happy to move to Chennai for the right person and I love travelling.",
+        "pref": {"age_min": 24, "age_max": 30, "religions": ["hindu"], "countries": ["India"], "diets": ["vegetarian", "eggetarian"],
+                 "wants_children": ["yes", "open"]},
+    },
+    {
+        "pair": 2, "name": "Arjun Menon", "dob": date(1995, 10, 4), "height_cm": 178,
+        "city": "Thiruvananthapuram", "state": "Kerala", "country": "India", "open_to_relocate": "yes",
+        "religion": "hindu", "mother_tongue": "Malayalam", "education_level": "professional", "education_field": "Medicine (Surgery)",
+        "occupation": "Surgeon",
+        "family_type": "nuclear", "family_values": "liberal", "diet": "non_vegetarian", "drinking": "socially",
+        "wants_children": "yes", "marriage_timeline": "1_to_2_years", "living_arrangement": "independent",
+        "about_family": "My mum is a professor and my dad a retired navy officer.",
+        "about_me": "General surgeon, swimmer and terrible-but-enthusiastic cook. Looking for a partner who understands long hospital shifts and loves the sea as much as I do.",
+        "pref": {"age_min": 25, "age_max": 31, "education_levels": ["masters", "professional", "doctorate"],
+                 "wants_children": ["yes"], "living_arrangements": ["independent", "flexible"]},
+    },
+    {
+        "pair": 3, "name": "Rohan George", "dob": date(1994, 6, 19), "height_cm": 180,
+        "city": "Bengaluru", "state": "Karnataka", "country": "India", "open_to_relocate": "maybe",
+        "religion": "christian", "mother_tongue": "Malayalam", "education_level": "masters", "education_field": "Business (MBA)",
+        "occupation": "Product manager", "annual_income": 3200000, "income_currency": "INR",
+        "family_type": "nuclear", "family_values": "moderate", "diet": "non_vegetarian", "drinking": "socially",
+        "wants_children": "open", "marriage_timeline": "6_to_12_months", "living_arrangement": "independent",
+        "about_family": "Parents live in Kottayam; my brother is a pilot.",
+        "about_me": "PM at a fintech start-up. I trek most weekends, sing in my church choir and make a decent appam. Looking for someone creative and grounded.",
+        "pref": {"age_min": 26, "age_max": 32, "religions": ["christian"], "countries": ["India"]},
+    },
+    {
+        "pair": 4, "name": "Imran Qureshi", "dob": date(1997, 3, 3), "height_cm": 176,
+        "city": "Hyderabad", "state": "Telangana", "country": "India", "open_to_relocate": "no",
+        "religion": "muslim", "mother_tongue": "Urdu", "education_level": "professional", "education_field": "Chartered Accountancy",
+        "occupation": "Chartered accountant",
+        "family_type": "joint", "family_values": "traditional", "diet": "non_vegetarian",
+        "wants_children": "yes", "marriage_timeline": "within_6_months", "living_arrangement": "with_family",
+        "about_family": "We live as a joint family in Mehdipatnam; family means everything to us.",
+        "about_me": "CA at a Big Four firm. I pray five times a day, play cricket on Sundays and never miss Haleem season. Ready to settle down this year.",
+        "pref": {"age_min": 22, "age_max": 28, "religions": ["muslim"], "countries": ["India"],
+                 "wants_children": ["yes"], "marriage_timelines": ["within_6_months"], "living_arrangements": ["with_family"]},
+    },
+    {
+        "pair": 5, "name": "Harpreet Singh", "dob": date(1995, 12, 11), "height_cm": 183,
+        "city": "Toronto", "state": "Ontario", "country": "Canada", "open_to_relocate": "no",
+        "religion": "sikh", "mother_tongue": "Punjabi", "education_level": "masters", "education_field": "Civil Engineering",
+        "occupation": "Civil engineer", "annual_income": 110000, "income_currency": "CAD",
+        "family_type": "nuclear", "family_values": "moderate", "diet": "non_vegetarian",
+        "wants_children": "yes", "marriage_timeline": "6_to_12_months", "living_arrangement": "independent",
+        "about_family": "My parents run a restaurant in Mississauga; two younger sisters.",
+        "about_me": "I build bridges (literally). Big fan of hockey, bhangra and my mum's makki di roti. Settled in Toronto and looking for a partner to build a home with.",
+        "pref": {"age_min": 25, "age_max": 32, "religions": ["sikh"], "countries": ["Canada"], "wants_children": ["yes"]},
+    },
+    {
+        "pair": 6, "name": "Vikram Kulkarni", "dob": date(1993, 4, 22), "height_cm": 174,
+        "city": "Mumbai", "state": "Maharashtra", "country": "India", "open_to_relocate": "yes",
+        "religion": "hindu", "mother_tongue": "Marathi", "education_level": "masters", "education_field": "Engineering",
+        "occupation": "Founder, climate-tech start-up", "employment_type": "business",
+        "family_type": "nuclear", "family_values": "liberal", "diet": "vegetarian",
+        "wants_children": "no", "marriage_timeline": "1_to_2_years", "living_arrangement": "independent",
+        "about_family": "My parents live in Nashik; my sister is a journalist.",
+        "about_me": "Running a solar start-up and running half-marathons. I've decided I don't want children; I want a partner for adventures, ideas and quiet Sunday mornings.",
+        "pref": {"age_min": 27, "age_max": 34, "wants_children": ["no"], "diets": ["vegetarian", "vegan", "eggetarian"]},
+    },
+    {
+        "pair": 7, "name": "Aditya Sharma", "dob": date(1997, 8, 9), "height_cm": 179,
+        "city": "Gurugram", "state": "Haryana", "country": "India", "open_to_relocate": "yes",
+        "religion": "hindu", "mother_tongue": "Hindi", "education_level": "masters", "education_field": "Finance (MBA)",
+        "occupation": "Investment banker", "annual_income": 4000000, "income_currency": "INR",
+        "family_type": "nuclear", "family_values": "moderate", "diet": "eggetarian", "drinking": "socially",
+        "wants_children": "yes", "marriage_timeline": "within_6_months", "living_arrangement": "flexible",
+        "about_family": "Dad is an army officer, mum a school principal.",
+        "about_me": "Banker who unwinds with Bollywood music, mountain drives and cooking rajma for friends. Family-first, ready to settle down soon.",
+        "pref": {"age_min": 24, "age_max": 30, "religions": ["hindu"], "countries": ["India"],
+                 "wants_children": ["yes"], "marriage_timelines": ["within_6_months", "6_to_12_months"]},
+    },
+    {
+        "pair": 8, "name": "Jay Shah", "dob": date(1996, 2, 14), "height_cm": 172,
+        "city": "Ahmedabad", "state": "Gujarat", "country": "India", "open_to_relocate": "no",
+        "religion": "jain", "mother_tongue": "Gujarati", "education_level": "bachelors", "education_field": "Commerce",
+        "occupation": "Family business (diamonds)", "employment_type": "business",
+        "family_type": "joint", "family_values": "traditional", "diet": "jain",
+        "wants_children": "yes", "marriage_timeline": "6_to_12_months", "living_arrangement": "with_family",
+        "about_family": "Joint family; three generations under one roof.",
+        "about_me": "I help run our family's diamond business. Weekends are for cricket, temple seva and dhokla. Looking for a partner who values family and traditions.",
+        "pref": {"age_min": 23, "age_max": 30, "religions": ["jain"], "diets": ["jain", "vegetarian"],
+                 "wants_children": ["yes"], "living_arrangements": ["with_family"]},
+    },
+    {
+        "pair": 9, "name": "Sameer Ali", "dob": date(1994, 9, 30), "height_cm": 181,
+        "city": "London", "state": "England", "country": "United Kingdom", "open_to_relocate": "yes",
+        "religion": "muslim", "mother_tongue": "Urdu", "education_level": "masters", "education_field": "Computer Science",
+        "occupation": "Software architect", "annual_income": 95000, "income_currency": "GBP",
+        "family_type": "nuclear", "family_values": "liberal", "diet": "non_vegetarian",
+        "wants_children": "open", "marriage_timeline": "1_to_2_years", "living_arrangement": "independent",
+        "about_family": "Parents in Lucknow; my brother lives in Dubai.",
+        "about_me": "Software architect in London, open to moving to the Gulf. I love photography walks, football and Lucknowi kebabs. Values over geography.",
+        "pref": {"age_min": 26, "age_max": 33, "religions": ["muslim"], "requires_relocation_openness": True},
+    },
+    {
+        "pair": 10, "name": "Nikhil Rao", "dob": date(1998, 11, 5), "height_cm": 177,
+        "city": "Hyderabad", "state": "Telangana", "country": "India", "open_to_relocate": "maybe",
+        "religion": "hindu", "mother_tongue": "Telugu", "education_level": "bachelors", "education_field": "Computer Science",
+        "occupation": "Game developer", "annual_income": 1600000, "income_currency": "INR",
+        "family_type": "nuclear", "family_values": "moderate", "diet": "non_vegetarian",
+        "wants_children": "yes", "marriage_timeline": "not_sure", "living_arrangement": "flexible",
+        "about_family": "Parents run a school in Warangal.",
+        "about_me": "I make mobile games and play way too many board games. Live music, biryani crawls and long chats are my thing. No rush — looking for the right connection.",
+        "pref": {"age_min": 23, "age_max": 29, "countries": ["India"], "wants_children": ["yes", "open"]},
+    },
+]
+
+
+def demo_email(name):
+    return name.lower().replace(" ", ".") + "@" + DEMO_EMAIL_DOMAIN
+
+
+def profile_fields(person):
+    """Profile model fields for a demo person (excluding name/pref/pair)."""
+    fields = {**_BASE, **{k: v for k, v in person.items() if k not in ("pair", "name", "dob", "pref")}}
+    fields["date_of_birth"] = person["dob"]
+    fields["about_me"] = person["about_me"] + DEMO_NOTE
+    return fields

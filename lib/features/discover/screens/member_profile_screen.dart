@@ -8,6 +8,7 @@ import '../../../core/models/models.dart';
 import '../../../shared/widgets/paird_widgets.dart';
 import '../../messaging/screens/chat_screen.dart';
 import '../../safety/safety_actions.dart';
+import '../ai_insight_card.dart';
 
 /// Another member's profile (`GET /members/<id>/`), already filtered by the
 /// server according to their privacy settings. Pops with `true` if the
@@ -282,7 +283,8 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'How many of your partner preferences this profile meets. It is not a prediction of compatibility.',
+                  'How well you two fit: what you each asked for, plus your plans, values and lifestyle. '
+                  'It is a guide, not a prediction.',
                   style: AppTheme.sans(size: 12, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 10),
@@ -301,6 +303,10 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
               ],
             ),
           ),
+        if (!_isSelf) ...[
+          const SizedBox(height: 12),
+          AiInsightCard(userId: widget.userId),
+        ],
         if ((d['about_me'] as String? ?? '').isNotEmpty) ...[
           const SizedBox(height: 12),
           SectionCard(title: 'About', child: Text(d['about_me'] as String, style: AppTheme.sans(height: 1.5))),

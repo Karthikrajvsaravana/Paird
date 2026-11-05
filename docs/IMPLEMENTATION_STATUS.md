@@ -44,7 +44,7 @@ Flutter app (Android)  ──HTTPS/JSON + JWT──▶  Django REST Framework (/
 | 8 | Matches and interests | Done | Send, accept, decline, withdraw, 7-day expiry enforced on the server, idempotent, mutual interest becomes a match, end match. |
 | 9 | Messaging | Done (polling) | Matched members only, membership checked on every request, history paging, unread counts, read receipts. Not real-time; see limitations. |
 | 10 | Partner preferences | Done | Validated on the server and used by Discover and the Vibe Score. |
-| 11 | Vibe Score | Done | Transparent rules-based preference fit, documented and tested. No AI and no claim that it predicts compatibility. |
+| 11 | Vibe Score / AI matching | Done (AI needs a key) | Rules-based mutual match engine: both sides' stated preferences, children deal-breaker, timeline, lifestyle, location, values. It ranks Discover ("Best matches") and recommendations. Optional AI match insight by Claude on profile pages: privacy-filtered input, cached, daily limit, member opt-out. The AI part was tested with a mocked client and a local API stand-in, and needs `ANTHROPIC_API_KEY` for real use. 20 demo profiles via `paird_seed_demo`. |
 | 12 | Profile viewing | Done | Filtered by privacy; email, phone, surname and exact date of birth are never shown. |
 | 13 | Profile editing | Done | Every section, name, and photos (upload, delete, main photo; location data stripped). |
 | 14 | Verification | Done (staff review) | Pending / approved / rejected / unverified. Only staff can approve, in the Django admin. It's a photo check, **not** an ID check, and the selfie is deleted after review. |
@@ -213,6 +213,7 @@ flutter test
 |---|---|---|
 | SMTP (`EMAIL_HOST`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL`) | Welcome email after email sign-up, and password reset emails | Debug mode prints these emails (welcome email and reset code) in the Django console. Production returns "not configured". |
 | SMS provider | Phone-number password reset | The app says it isn't available. |
+| Anthropic API key (`ANTHROPIC_API_KEY`) | AI match insights | AI card hidden; the Vibe Score engine works without it. |
 | Google OAuth client and SHA-1 | Google sign-in | The button says it isn't available. |
 | Firebase Cloud Messaging | Push notifications | In-app notifications and badges only. |
 | Google Play Billing (or Stripe) and server receipt verification | Buying Premium | Purchases disabled. Staff can grant Premium in the admin. |

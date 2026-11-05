@@ -85,6 +85,9 @@ class PairdApi {
   Future<void> deletePhoto(int id) => client.delete('/photos/$id/');
   Future<void> makePrimaryPhoto(int id) => client.patch('/photos/$id/', {'is_primary': true});
   Future<Map<String, dynamic>> member(int userId) async => _map(await client.get('/members/$userId/'));
+  /// AI match insight: {status: ready|unavailable, insight, message}.
+  Future<Map<String, dynamic>> memberInsight(int userId) async =>
+      _map(await client.get('/members/$userId/insight/'));
 
   // Dashboard & discovery ------------------------------------------------------
   Future<Map<String, dynamic>> dashboard() async => _map(await client.get('/dashboard/'));

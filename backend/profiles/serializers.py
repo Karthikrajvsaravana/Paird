@@ -69,6 +69,7 @@ PRIVACY_FIELDS = [
     "income_visibility",
     "lifestyle_visibility",
     "show_last_seen",
+    "allow_ai_insights",
 ]
 
 

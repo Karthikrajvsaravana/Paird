@@ -257,6 +257,7 @@ REST_FRAMEWORK = {
         "messages": os.environ.get("THROTTLE_MESSAGES", "60/min"),
         "reports": os.environ.get("THROTTLE_REPORTS", "10/hour"),
         "uploads": os.environ.get("THROTTLE_UPLOADS", "20/hour"),
+        "ai": os.environ.get("THROTTLE_AI", "20/min"),
     },
 }
 
@@ -302,6 +303,16 @@ PAIRD = {
     "MESSAGE_MAX_LENGTH": 2000,
     "WELCOME_EMAIL_ENABLED": env_bool("PAIRD_WELCOME_EMAIL_ENABLED", True),
     "SUPPORT_EMAIL": os.environ.get("PAIRD_SUPPORT_EMAIL", "").strip(),
+}
+
+# AI match insights (Claude). Off unless an API key is configured. Only the
+# backend holds the key; the app never talks to Anthropic directly.
+PAIRD_AI = {
+    "ENABLED": env_bool("PAIRD_AI_ENABLED", True) and bool(os.environ.get("ANTHROPIC_API_KEY")),
+    "MODEL": os.environ.get("PAIRD_AI_MODEL", "claude-opus-5-5"),
+    "EFFORT": os.environ.get("PAIRD_AI_EFFORT", "medium"),
+    "TIMEOUT_SECONDS": env_int("PAIRD_AI_TIMEOUT_SECONDS", 60),
+    "DAILY_LIMIT_PER_USER": env_int("PAIRD_AI_DAILY_LIMIT", 40),
 }
 
 

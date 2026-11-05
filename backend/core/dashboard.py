@@ -5,7 +5,6 @@ from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from matching.compatibility import vibe_score
 from matching.discovery import recommendations
 from matching.models import Interest, Match
 from matching.services import connection_map
@@ -60,7 +59,7 @@ class DashboardView(APIView):
 
         recs = []
         if profile.is_complete:
-            rec_profiles = recommendations(user, limit=5)
+            rec_profiles, rec_vibes = recommendations(user, limit=5)
             ids = [p.user_id for p in rec_profiles]
             verified = verified_user_ids(ids)
             connections = connection_map(user, ids)
@@ -71,7 +70,7 @@ class DashboardView(APIView):
                     request=request,
                     rel=OTHER,
                     verified=p.user_id in verified,
-                    vibe=vibe_score(preference, p, OTHER),
+                    vibe=rec_vibes[p.user_id],
                     connection=connections[p.user_id],
                 )
                 for p in rec_profiles

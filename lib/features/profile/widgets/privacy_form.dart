@@ -47,6 +47,9 @@ class PrivacyForm extends StatelessWidget {
         _select('income_visibility', 'Income', 'Who can see your income.'),
         _select('lifestyle_visibility', 'Lifestyle', 'Who can see diet, smoking and drinking.'),
         _toggle('show_last_seen', 'Show last active', 'If off, you also won’t see others’ last active time.'),
+        _toggle('allow_ai_insights', 'AI match insights',
+            'Let PairD’s AI (Anthropic Claude) read profile details — never your name, contact details or photos — '
+            'to write match insights. If off, no insights are made about you or for you.'),
       ],
     );
   }

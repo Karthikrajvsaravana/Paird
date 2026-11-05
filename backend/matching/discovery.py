@@ -9,7 +9,7 @@ from profiles.services import OTHER, get_preference, get_profile
 from safety.services import blocked_user_ids
 from verification.services import verified_user_ids
 
-from .compatibility import vibe_score
+from .compatibility import vibe_for
 from .models import Interest
 from .services import active_match_user_ids
 
@@ -66,6 +66,7 @@ def parse_filters(params):
     filters["verified_only"] = params.get("verified_only") in ("1", "true", "True")
     filters["with_photo"] = params.get("with_photo") in ("1", "true", "True")
     filters["use_preferences"] = params.get("use_preferences", "true") not in ("0", "false", "False")
+    filters["sort"] = "recent" if params.get("sort") == "recent" else "best"
     return filters
 
 
@@ -153,13 +154,21 @@ def discover(viewer, filters):
     return candidates
 
 
-def recommendations(viewer, limit=5):
-    """Top candidates by Vibe Score (ties broken by recent activity)."""
+def rank_by_match(viewer, candidates):
+    """
+    Order candidates by Vibe Score (best first; ties and unscored profiles by
+    recent activity, which is the incoming order). Returns (profiles, {user_id: vibe}).
+    """
     pref = get_preference(viewer)
-    candidates = discover(viewer, parse_filters({}))[:100]
-    scored = []
-    for index, profile in enumerate(candidates):
-        score = vibe_score(pref, profile, OTHER)["score"]
-        scored.append((-(score if score is not None else -1), index, profile))
-    scored.sort(key=lambda item: (item[0], item[1]))
-    return [profile for _, _, profile in scored[:limit]]
+    vibes = {p.user_id: vibe_for(viewer, p, OTHER, viewer_pref=pref) for p in candidates}
+    ordered = sorted(
+        enumerate(candidates),
+        key=lambda item: (-(vibes[item[1].user_id]["score"] if vibes[item[1].user_id]["score"] is not None else -1), item[0]),
+    )
+    return [profile for _, profile in ordered], vibes
+
+
+def recommendations(viewer, limit=5):
+    """Top candidates by Vibe Score (the match engine)."""
+    ranked, vibes = rank_by_match(viewer, discover(viewer, parse_filters({})))
+    return ranked[:limit], vibes

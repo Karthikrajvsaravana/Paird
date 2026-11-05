@@ -77,6 +77,10 @@ class Profile(models.Model):
     income_visibility = models.CharField(max_length=10, choices=c.AUDIENCE_WITH_HIDDEN, default="matches")
     lifestyle_visibility = models.CharField(max_length=10, choices=c.AUDIENCE_WITH_HIDDEN, default="everyone")
     show_last_seen = models.BooleanField(default=True)
+    allow_ai_insights = models.BooleanField(
+        default=True,
+        help_text="Allow this profile to be included in AI match insights (sent to the AI provider without name, contact details or photos).",
+    )
 
     last_active_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
